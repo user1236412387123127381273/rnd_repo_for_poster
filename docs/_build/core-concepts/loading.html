@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Loading a Binary &#8212; bisa  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Symbolic Expressions and Constraint Solving" href="solver.html" />
+    <link rel="prev" title="Core Concepts" href="toplevel.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="loading-a-binary">
+<h1>Loading a Binary<a class="headerlink" href="#loading-a-binary" title="Link to this heading">¶</a></h1>
+<p>Previously, you saw just the barest taste of bisa’s loading facilities - you
+loaded <code class="docutils literal notranslate"><span class="pre">/bin/true</span></code>, and then loaded it again without its shared libraries. You
+also saw <code class="docutils literal notranslate"><span class="pre">proj.loader</span></code> and a few things it could do. Now, we’ll dive into the
+nuances of these interfaces and the things they can tell you.</p>
+<p>We briefly mentioned bisa’s binary loading component, CLE. CLE stands for “CLE
+Loads Everything”, and is responsible for taking a binary (and any libraries
+that it depends on) and presenting it to the rest of bisa in a way that is easy
+to work with.</p>
+<section id="the-loader">
+<h2>The Loader<a class="headerlink" href="#the-loader" title="Link to this heading">¶</a></h2>
+<p>Let’s load <code class="docutils literal notranslate"><span class="pre">examples/fauxware/fauxware</span></code> and take a deeper look at how to
+interact with the loader.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">bisa</span><span class="o">,</span><span class="w"> </span><span class="nn">monkeyhex</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span> <span class="o">=</span> <span class="n">bisa</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="s1">&#39;examples/fauxware/fauxware&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span><span class="o">.</span><span class="n">loader</span>
+<span class="go">&lt;Loaded fauxware, maps [0x400000:0x5008000]&gt;</span>
+</pre></div>
+</div>
+<section id="loaded-objects">
+<h3>Loaded Objects<a class="headerlink" href="#loaded-objects" title="Link to this heading">¶</a></h3>
+<p>The CLE loader (<code class="docutils literal notranslate"><span class="pre">cle.Loader</span></code>) represents an entire conglomerate of loaded
+<em>binary objects</em>, loaded and mapped into a single memory space. Each binary
+object is loaded by a loader backend that can handle its filetype (a subclass of
+<code class="docutils literal notranslate"><span class="pre">cle.Backend</span></code>). For example, <code class="docutils literal notranslate"><span class="pre">cle.ELF</span></code> is used to load ELF binaries.</p>
+<p>There will also be objects in memory that don’t correspond to any loaded binary.
+For example, an object used to provide thread-local storage support, and an
+externs object used to provide unresolved symbols.</p>
+<p>You can get the full list of objects that CLE has loaded with
+<code class="docutils literal notranslate"><span class="pre">loader.all_objects</span></code>, as well as several more targeted classifications:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># All loaded objects</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">all_objects</span>
+<span class="p">[</span><span class="o">&lt;</span><span class="n">ELF</span> <span class="n">Object</span> <span class="n">fauxware</span><span class="p">,</span> <span class="n">maps</span> <span class="p">[</span><span class="mh">0x400000</span><span class="p">:</span><span class="mh">0x60105f</span><span class="p">]</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="o">&lt;</span><span class="n">ELF</span> <span class="n">Object</span> <span class="n">libc</span><span class="o">-</span><span class="mf">2.23</span><span class="o">.</span><span class="n">so</span><span class="p">,</span> <span class="n">maps</span> <span class="p">[</span><span class="mh">0x1000000</span><span class="p">:</span><span class="mh">0x13c999f</span><span class="p">]</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="o">&lt;</span><span class="n">ELF</span> <span class="n">Object</span> <span class="n">ld</span><span class="o">-</span><span class="mf">2.23</span><span class="o">.</span><span class="n">so</span><span class="p">,</span> <span class="n">maps</span> <span class="p">[</span><span class="mh">0x2000000</span><span class="p">:</span><span class="mh">0x2227167</span><span class="p">]</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="o">&lt;</span><span class="n">ELFTLSObject</span> <span class="n">Object</span> <span class="n">cle</span><span class="c1">##tls, maps [0x3000000:0x3015010]&gt;,</span>
+ <span class="o">&lt;</span><span class="n">ExternObject</span> <span class="n">Object</span> <span class="n">cle</span><span class="c1">##externs, maps [0x4000000:0x4008000]&gt;,</span>
+ <span class="o">&lt;</span><span class="n">KernelObject</span> <span class="n">Object</span> <span class="n">cle</span><span class="c1">##kernel, maps [0x5000000:0x5008000]&gt;]</span>
+
+<span class="c1"># This is the &quot;main&quot; object, the one that you directly specified when loading the project</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">main_object</span>
+<span class="o">&lt;</span><span class="n">ELF</span> <span class="n">Object</span> <span class="n">fauxware</span><span class="p">,</span> <span class="n">maps</span> <span class="p">[</span><span class="mh">0x400000</span><span class="p">:</span><span class="mh">0x60105f</span><span class="p">]</span><span class="o">&gt;</span>
+
+<span class="c1"># This is a dictionary mapping from shared object name to object</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">shared_objects</span>
+<span class="p">{</span> <span class="s1">&#39;fauxware&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">ELF</span> <span class="n">Object</span> <span class="n">fauxware</span><span class="p">,</span> <span class="n">maps</span> <span class="p">[</span><span class="mh">0x400000</span><span class="p">:</span><span class="mh">0x60105f</span><span class="p">]</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="s1">&#39;libc.so.6&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">ELF</span> <span class="n">Object</span> <span class="n">libc</span><span class="o">-</span><span class="mf">2.23</span><span class="o">.</span><span class="n">so</span><span class="p">,</span> <span class="n">maps</span> <span class="p">[</span><span class="mh">0x1000000</span><span class="p">:</span><span class="mh">0x13c999f</span><span class="p">]</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="s1">&#39;ld-linux-x86-64.so.2&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">ELF</span> <span class="n">Object</span> <span class="n">ld</span><span class="o">-</span><span class="mf">2.23</span><span class="o">.</span><span class="n">so</span><span class="p">,</span> <span class="n">maps</span> <span class="p">[</span><span class="mh">0x2000000</span><span class="p">:</span><span class="mh">0x2227167</span><span class="p">]</span><span class="o">&gt;</span> <span class="p">}</span>
+
+<span class="c1"># Here&#39;s all the objects that were loaded from ELF files</span>
+<span class="c1"># If this were a windows program we&#39;d use all_pe_objects!</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">all_elf_objects</span>
+<span class="p">[</span><span class="o">&lt;</span><span class="n">ELF</span> <span class="n">Object</span> <span class="n">fauxware</span><span class="p">,</span> <span class="n">maps</span> <span class="p">[</span><span class="mh">0x400000</span><span class="p">:</span><span class="mh">0x60105f</span><span class="p">]</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="o">&lt;</span><span class="n">ELF</span> <span class="n">Object</span> <span class="n">libc</span><span class="o">-</span><span class="mf">2.23</span><span class="o">.</span><span class="n">so</span><span class="p">,</span> <span class="n">maps</span> <span class="p">[</span><span class="mh">0x1000000</span><span class="p">:</span><span class="mh">0x13c999f</span><span class="p">]</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="o">&lt;</span><span class="n">ELF</span> <span class="n">Object</span> <span class="n">ld</span><span class="o">-</span><span class="mf">2.23</span><span class="o">.</span><span class="n">so</span><span class="p">,</span> <span class="n">maps</span> <span class="p">[</span><span class="mh">0x2000000</span><span class="p">:</span><span class="mh">0x2227167</span><span class="p">]</span><span class="o">&gt;</span><span class="p">]</span>
+
+<span class="c1"># Here&#39;s the &quot;externs object&quot;, which we use to provide addresses for unresolved imports and bisa internals</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">extern_object</span>
+<span class="o">&lt;</span><span class="n">ExternObject</span> <span class="n">Object</span> <span class="n">cle</span><span class="c1">##externs, maps [0x4000000:0x4008000]&gt;</span>
+
+<span class="c1"># This object is used to provide addresses for emulated syscalls</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">kernel_object</span>
+<span class="o">&lt;</span><span class="n">KernelObject</span> <span class="n">Object</span> <span class="n">cle</span><span class="c1">##kernel, maps [0x5000000:0x5008000]&gt;</span>
+
+<span class="c1"># Finally, you can to get a reference to an object given an address in it</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">find_object_containing</span><span class="p">(</span><span class="mh">0x400000</span><span class="p">)</span>
+<span class="o">&lt;</span><span class="n">ELF</span> <span class="n">Object</span> <span class="n">fauxware</span><span class="p">,</span> <span class="n">maps</span> <span class="p">[</span><span class="mh">0x400000</span><span class="p">:</span><span class="mh">0x60105f</span><span class="p">]</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>You can interact directly with these objects to extract metadata from them:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">obj</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">main_object</span>
+
+<span class="go"># The entry point of the object</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obj</span><span class="o">.</span><span class="n">entry</span>
+<span class="go">0x400580</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obj</span><span class="o">.</span><span class="n">min_addr</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">max_addr</span>
+<span class="go">(0x400000, 0x60105f)</span>
+
+<span class="go"># Retrieve this ELF&#39;s segments and sections</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obj</span><span class="o">.</span><span class="n">segments</span>
+<span class="go">&lt;Regions: [&lt;ELFSegment memsize=0xa74, filesize=0xa74, vaddr=0x400000, flags=0x5, offset=0x0&gt;,</span>
+<span class="go">           &lt;ELFSegment memsize=0x238, filesize=0x228, vaddr=0x600e28, flags=0x6, offset=0xe28&gt;]&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obj</span><span class="o">.</span><span class="n">sections</span>
+<span class="go">&lt;Regions: [&lt;Unnamed | offset 0x0, vaddr 0x0, size 0x0&gt;,</span>
+<span class="go">           &lt;.interp | offset 0x238, vaddr 0x400238, size 0x1c&gt;,</span>
+<span class="go">           &lt;.note.ABI-tag | offset 0x254, vaddr 0x400254, size 0x20&gt;,</span>
+<span class="go">            ...etc</span>
+
+<span class="go"># You can get an individual segment or section by an address it contains:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obj</span><span class="o">.</span><span class="n">find_segment_containing</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">entry</span><span class="p">)</span>
+<span class="go">&lt;ELFSegment memsize=0xa74, filesize=0xa74, vaddr=0x400000, flags=0x5, offset=0x0&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obj</span><span class="o">.</span><span class="n">find_section_containing</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">entry</span><span class="p">)</span>
+<span class="go">&lt;.text | offset 0x580, vaddr 0x400580, size 0x338&gt;</span>
+
+<span class="go"># Get the address of the PLT stub for a symbol</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">addr</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">plt</span><span class="p">[</span><span class="s1">&#39;strcmp&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">addr</span>
+<span class="go">0x400550</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obj</span><span class="o">.</span><span class="n">reverse_plt</span><span class="p">[</span><span class="n">addr</span><span class="p">]</span>
+<span class="go">&#39;strcmp&#39;</span>
+
+<span class="go"># Show the prelinked base of the object and the location it was actually mapped into memory by CLE</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obj</span><span class="o">.</span><span class="n">linked_base</span>
+<span class="go">0x400000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obj</span><span class="o">.</span><span class="n">mapped_base</span>
+<span class="go">0x400000</span>
+</pre></div>
+</div>
+</section>
+<section id="symbols-and-relocations">
+<h3>Symbols and Relocations<a class="headerlink" href="#symbols-and-relocations" title="Link to this heading">¶</a></h3>
+<p>You can also work with symbols while using CLE. A symbol is a fundamental
+concept in the world of executable formats, effectively mapping a name to an
+address.</p>
+<p>The easiest way to get a symbol from CLE is to use <code class="docutils literal notranslate"><span class="pre">loader.find_symbol</span></code>, which
+takes either a name or an address and returns a Symbol object.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">strcmp</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">find_symbol</span><span class="p">(</span><span class="s1">&#39;strcmp&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">strcmp</span>
+<span class="go">&lt;Symbol &quot;strcmp&quot; in libc.so.6 at 0x1089cd0&gt;</span>
+</pre></div>
+</div>
+<p>The most useful attributes on a symbol are its name, its owner, and its address,
+but the “address” of a symbol can be ambiguous. The Symbol object has three ways
+of reporting its address:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">.rebased_addr</span></code> is its address in the global address space. This is what is
+shown in the print output.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.linked_addr</span></code> is its address relative to the prelinked base of the binary.
+This is the address reported in, for example, <code class="docutils literal notranslate"><span class="pre">readelf(1)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.relative_addr</span></code> is its address relative to the object base. This is known
+in the literature (particularly the Windows literature) as an RVA (relative
+virtual address).</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">strcmp</span><span class="o">.</span><span class="n">name</span>
+<span class="go">&#39;strcmp&#39;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">strcmp</span><span class="o">.</span><span class="n">owner</span>
+<span class="go">&lt;ELF Object libc-2.23.so, maps [0x1000000:0x13c999f]&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">strcmp</span><span class="o">.</span><span class="n">rebased_addr</span>
+<span class="go">0x1089cd0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">strcmp</span><span class="o">.</span><span class="n">linked_addr</span>
+<span class="go">0x89cd0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">strcmp</span><span class="o">.</span><span class="n">relative_addr</span>
+<span class="go">0x89cd0</span>
+</pre></div>
+</div>
+<p>In addition to providing debug information, symbols also support the notion of
+dynamic linking. libc provides the strcmp symbol as an export, and the main
+binary depends on it. If we ask CLE to give us a strcmp symbol from the main
+object directly, it’ll tell us that this is an <em>import symbol</em>. Import symbols
+do not have meaningful addresses associated with them, but they do provide a
+reference to the symbol that was used to resolve them, as <code class="docutils literal notranslate"><span class="pre">.resolvedby</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">strcmp</span><span class="o">.</span><span class="n">is_export</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">strcmp</span><span class="o">.</span><span class="n">is_import</span>
+<span class="go">False</span>
+
+<span class="go"># On Loader, the method is find_symbol because it performs a search operation to find the symbol.</span>
+<span class="go"># On an individual object, the method is get_symbol because there can only be one symbol with a given name.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">main_strcmp</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">main_object</span><span class="o">.</span><span class="n">get_symbol</span><span class="p">(</span><span class="s1">&#39;strcmp&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">main_strcmp</span>
+<span class="go">&lt;Symbol &quot;strcmp&quot; in fauxware (import)&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">main_strcmp</span><span class="o">.</span><span class="n">is_export</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">main_strcmp</span><span class="o">.</span><span class="n">is_import</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">main_strcmp</span><span class="o">.</span><span class="n">resolvedby</span>
+<span class="go">&lt;Symbol &quot;strcmp&quot; in libc.so.6 at 0x1089cd0&gt;</span>
+</pre></div>
+</div>
+<p>The specific ways that the links between imports and exports should be
+registered in memory are handled by another notion called <em>relocations</em>. A
+relocation says, “when you match <em>[import]</em> up with an export symbol, please
+write the export’s address to <em>[location]</em>, formatted as <em>[format]</em>.” We can see
+the full list of relocations for an object (as <code class="docutils literal notranslate"><span class="pre">Relocation</span></code> instances) as
+<code class="docutils literal notranslate"><span class="pre">obj.relocs</span></code>, or just a mapping from symbol name to Relocation as
+<code class="docutils literal notranslate"><span class="pre">obj.imports</span></code>. There is no corresponding list of export symbols.</p>
+<p>A relocation’s corresponding import symbol can be accessed as <code class="docutils literal notranslate"><span class="pre">.symbol</span></code>. The
+address the relocation will write to is accessible through any of the address
+identifiers you can use for Symbol, and you can get a reference to the object
+requesting the relocation with <code class="docutils literal notranslate"><span class="pre">.owner</span></code> as well.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Relocations don&#39;t have a good pretty-printing, so those addresses are Python-internal, unrelated to our program</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">shared_objects</span><span class="p">[</span><span class="s1">&#39;libc.so.6&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">imports</span>
+<span class="p">{</span><span class="s1">&#39;__libc_enable_secure&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">cle</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">elf</span><span class="o">.</span><span class="n">relocation</span><span class="o">.</span><span class="n">amd64</span><span class="o">.</span><span class="n">R_X86_64_GLOB_DAT</span> <span class="n">at</span> <span class="mh">0x7ff5c5fce780</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="s1">&#39;__tls_get_addr&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">cle</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">elf</span><span class="o">.</span><span class="n">relocation</span><span class="o">.</span><span class="n">amd64</span><span class="o">.</span><span class="n">R_X86_64_JUMP_SLOT</span> <span class="n">at</span> <span class="mh">0x7ff5c6018358</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="s1">&#39;_dl_argv&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">cle</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">elf</span><span class="o">.</span><span class="n">relocation</span><span class="o">.</span><span class="n">amd64</span><span class="o">.</span><span class="n">R_X86_64_GLOB_DAT</span> <span class="n">at</span> <span class="mh">0x7ff5c5fd2e48</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="s1">&#39;_dl_find_dso_for_object&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">cle</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">elf</span><span class="o">.</span><span class="n">relocation</span><span class="o">.</span><span class="n">amd64</span><span class="o">.</span><span class="n">R_X86_64_JUMP_SLOT</span> <span class="n">at</span> <span class="mh">0x7ff5c6018588</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="s1">&#39;_dl_starting_up&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">cle</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">elf</span><span class="o">.</span><span class="n">relocation</span><span class="o">.</span><span class="n">amd64</span><span class="o">.</span><span class="n">R_X86_64_GLOB_DAT</span> <span class="n">at</span> <span class="mh">0x7ff5c5fd2550</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="s1">&#39;_rtld_global&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">cle</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">elf</span><span class="o">.</span><span class="n">relocation</span><span class="o">.</span><span class="n">amd64</span><span class="o">.</span><span class="n">R_X86_64_GLOB_DAT</span> <span class="n">at</span> <span class="mh">0x7ff5c5fce4e0</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="s1">&#39;_rtld_global_ro&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">cle</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">elf</span><span class="o">.</span><span class="n">relocation</span><span class="o">.</span><span class="n">amd64</span><span class="o">.</span><span class="n">R_X86_64_GLOB_DAT</span> <span class="n">at</span> <span class="mh">0x7ff5c5fcea20</span><span class="o">&gt;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>If an import cannot be resolved to any export, for example, because a shared
+library could not be found, CLE will automatically update the externs object
+(<code class="docutils literal notranslate"><span class="pre">loader.extern_obj</span></code>) to claim it provides the symbol as an export.</p>
+</section>
+</section>
+<section id="loading-options">
+<h2>Loading Options<a class="headerlink" href="#loading-options" title="Link to this heading">¶</a></h2>
+<p>If you are loading something with <code class="docutils literal notranslate"><span class="pre">bisa.Project</span></code> and you want to pass an
+option to the <code class="docutils literal notranslate"><span class="pre">cle.Loader</span></code> instance that Project implicitly creates, you can
+just pass the keyword argument directly to the Project constructor, and it will
+be passed on to CLE. You should look at the <a class="reference external" href="https://docs.angr.io/projects/cle/en/latest/api.html">CLE API docs.</a> if you want to know
+everything that could possibly be passed in as an option, but we will go over
+some important and frequently used options here.</p>
+<p>We’ve discussed <code class="docutils literal notranslate"><span class="pre">auto_load_libs</span></code> already - it enables or disables CLE’s
+attempt to automatically resolve shared library dependencies, and is on by
+default. Additionally, there is the opposite, <code class="docutils literal notranslate"><span class="pre">except_missing_libs</span></code>, which, if
+set to true, will cause an exception to be thrown whenever a binary has a shared
+library dependency that cannot be resolved.</p>
+<p>You can pass a list of strings to <code class="docutils literal notranslate"><span class="pre">force_load_libs</span></code> and anything listed will
+be treated as an unresolved shared library dependency right out of the gate, or
+you can pass a list of strings to <code class="docutils literal notranslate"><span class="pre">skip_libs</span></code> to prevent any library of that
+name from being resolved as a dependency. Additionally, you can pass a list of
+strings (or a single string) to <code class="docutils literal notranslate"><span class="pre">ld_path</span></code>, which will be used as an additional
+search path for shared libraries, before any of the defaults: the same directory
+as the loaded program, the current working directory, and your system libraries.</p>
+<p>If you want to specify some options that only apply to a specific binary object,
+CLE will let you do that too. The parameters <code class="docutils literal notranslate"><span class="pre">main_opts</span></code> and <code class="docutils literal notranslate"><span class="pre">lib_opts</span></code> do
+this by taking dictionaries of options. <code class="docutils literal notranslate"><span class="pre">main_opts</span></code> is a mapping from option
+names to option values, while <code class="docutils literal notranslate"><span class="pre">lib_opts</span></code> is a mapping from library name to
+dictionaries mapping option names to option values.</p>
+<p>The options that you can use vary from backend to backend, but some common ones
+are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">backend</span></code> - which backend to use, as either a class or a name</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">base_addr</span></code> - a base address to use</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">entry_point</span></code> - an entry point to use</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">arch</span></code> - the name of an architecture to use</p></li>
+</ul>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bisa</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="s1">&#39;examples/fauxware/fauxware&#39;</span><span class="p">,</span> <span class="n">main_opts</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;backend&#39;</span><span class="p">:</span> <span class="s1">&#39;blob&#39;</span><span class="p">,</span> <span class="s1">&#39;arch&#39;</span><span class="p">:</span> <span class="s1">&#39;i386&#39;</span><span class="p">},</span> <span class="n">lib_opts</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;libc.so.6&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;backend&#39;</span><span class="p">:</span> <span class="s1">&#39;elf&#39;</span><span class="p">}})</span>
+<span class="go">&lt;Project examples/fauxware/fauxware&gt;</span>
+</pre></div>
+</div>
+<section id="backends">
+<h3>Backends<a class="headerlink" href="#backends" title="Link to this heading">¶</a></h3>
+<p>CLE currently has backends for statically loading ELF, PE, CGC, Mach-O and ELF
+core dump files, as well as loading files into a flat address space. CLE will
+automatically detect the correct backend to use in most cases, so you shouldn’t
+need to specify which backend you’re using unless you’re doing some pretty weird
+stuff.</p>
+<p>You can force CLE to use a specific backend for an object by including a key in
+its options dictionary, as described above. Some backends cannot autodetect
+which architecture to use and <em>must</em> have a <code class="docutils literal notranslate"><span class="pre">arch</span></code> specified. The key doesn’t
+need to match any list of architectures; bisa will identify which architecture
+you mean given almost any common identifier for any supported arch.</p>
+<p>To refer to a backend, use the name from this table:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>backend name</p></th>
+<th class="head"><p>description</p></th>
+<th class="head"><p>requires <code class="docutils literal notranslate"><span class="pre">arch</span></code>?</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>elf</p></td>
+<td><p>Static loader for ELF files based on PyELFTools</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-odd"><td><p>pe</p></td>
+<td><p>Static loader for PE files based on PEFile</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-even"><td><p>mach-o</p></td>
+<td><p>Static loader for Mach-O files. Does not support dynamic linking or rebasing.</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-odd"><td><p>cgc</p></td>
+<td><p>Static loader for Cyber Grand Challenge binaries</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-even"><td><p>backedcgc</p></td>
+<td><p>Static loader for CGC binaries that allows specifying memory and register backers</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-odd"><td><p>elfcore</p></td>
+<td><p>Static loader for ELF core dumps</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-even"><td><p>blob</p></td>
+<td><p>Loads the file into memory as a flat image</p></td>
+<td><p>yes</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="symbolic-function-summaries">
+<h2>Symbolic Function Summaries<a class="headerlink" href="#symbolic-function-summaries" title="Link to this heading">¶</a></h2>
+<p>By default, Project tries to replace external calls to library functions by
+using symbolic summaries termed <em>SimProcedures</em> - effectively just Python
+functions that imitate the library function’s effect on the state. We’ve
+implemented <a class="reference external" href="https://github.com/bisa/bisa/tree/master/bisa/procedures">a whole bunch of functions</a> as SimProcedures.
+These builtin procedures are available in the <code class="docutils literal notranslate"><span class="pre">bisa.SIM_PROCEDURES</span></code>
+dictionary, which is two-leveled, keyed first on the package name (libc, posix,
+win32, stubs) and then on the name of the library function. Executing a
+SimProcedure instead of the actual library function that gets loaded from your
+system makes analysis a LOT more tractable, at the cost of <cite>some potential
+inaccuracies &lt;Gotchas when using bisa&gt;</cite>.</p>
+<p>When no such summary is available for a given function:</p>
+<ul class="simple">
+<li><p>if <code class="docutils literal notranslate"><span class="pre">auto_load_libs</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> (this is the default), then the <em>real</em>
+library function is executed instead. This may or may not be what you want,
+depending on the actual function. For example, some of libc’s functions are
+extremely complex to analyze and will most likely cause an explosion of the
+number of states for the path trying to execute them.</p></li>
+<li><p>if <code class="docutils literal notranslate"><span class="pre">auto_load_libs</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>, then external functions are unresolved,
+and Project will resolve them to a generic “stub” SimProcedure called
+<code class="docutils literal notranslate"><span class="pre">ReturnUnconstrained</span></code>. It does what its name says: it returns a unique
+unconstrained symbolic value each time it is called.</p></li>
+<li><p>if <code class="docutils literal notranslate"><span class="pre">use_sim_procedures</span></code> (this is a parameter to <code class="docutils literal notranslate"><span class="pre">bisa.Project</span></code>, not
+<code class="docutils literal notranslate"><span class="pre">cle.Loader</span></code>) is <code class="docutils literal notranslate"><span class="pre">False</span></code> (it is <code class="docutils literal notranslate"><span class="pre">True</span></code> by default), then only symbols
+provided by the extern object will be replaced with SimProcedures, and they
+will be replaced by a stub <code class="docutils literal notranslate"><span class="pre">ReturnUnconstrained</span></code>, which does nothing but
+return a symbolic value.</p></li>
+<li><p>you may specify specific symbols to exclude from being replaced with
+SimProcedures with the parameters to <code class="docutils literal notranslate"><span class="pre">bisa.Project</span></code>:
+<code class="docutils literal notranslate"><span class="pre">exclude_sim_procedures_list</span></code> and <code class="docutils literal notranslate"><span class="pre">exclude_sim_procedures_func</span></code>.</p></li>
+<li><p>Look at the code for <code class="docutils literal notranslate"><span class="pre">bisa.Project._register_object</span></code> for the exact
+algorithm.</p></li>
+</ul>
+<p>The mechanism by which bisa replaces library code with a Python summary is
+called hooking, and you can do it too! When performing simulation, at every step
+bisa checks if the current address has been hooked, and if so, runs the hook
+instead of the binary code at that address. The API to let you do this is
+<code class="docutils literal notranslate"><span class="pre">proj.hook(addr,</span> <span class="pre">hook)</span></code>, where <code class="docutils literal notranslate"><span class="pre">hook</span></code> is a SimProcedure instance. You can
+manage your project’s hooks with <code class="docutils literal notranslate"><span class="pre">.is_hooked</span></code>, <code class="docutils literal notranslate"><span class="pre">.unhook</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">.hooked_by</span></code>, which should hopefully not require explanation.</p>
+<p>There is an alternate API for hooking an address that lets you specify your own
+off-the-cuff function to use as a hook, by using <code class="docutils literal notranslate"><span class="pre">proj.hook(addr)</span></code> as a
+function decorator. If you do this, you can also optionally specify a <code class="docutils literal notranslate"><span class="pre">length</span></code>
+keyword argument to make execution jump some number of bytes forward after your
+hook finishes.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">stub_func</span> <span class="o">=</span> <span class="n">bisa</span><span class="o">.</span><span class="n">SIM_PROCEDURES</span><span class="p">[</span><span class="s1">&#39;stubs&#39;</span><span class="p">][</span><span class="s1">&#39;ReturnUnconstrained&#39;</span><span class="p">]</span> <span class="c1"># this is a CLASS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span><span class="o">.</span><span class="n">hook</span><span class="p">(</span><span class="mh">0x10000</span><span class="p">,</span> <span class="n">stub_func</span><span class="p">())</span>  <span class="c1"># hook with an instance of the class</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span><span class="o">.</span><span class="n">is_hooked</span><span class="p">(</span><span class="mh">0x10000</span><span class="p">)</span>            <span class="c1"># these functions should be pretty self-explanitory</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span><span class="o">.</span><span class="n">hooked_by</span><span class="p">(</span><span class="mh">0x10000</span><span class="p">)</span>
+<span class="go">&lt;ReturnUnconstrained&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span><span class="o">.</span><span class="n">unhook</span><span class="p">(</span><span class="mh">0x10000</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@proj</span><span class="o">.</span><span class="n">hook</span><span class="p">(</span><span class="mh">0x20000</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">my_hook</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rax</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span><span class="o">.</span><span class="n">is_hooked</span><span class="p">(</span><span class="mh">0x20000</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Furthermore, you can use <code class="docutils literal notranslate"><span class="pre">proj.hook_symbol(name,</span> <span class="pre">hook)</span></code>, providing the name of
+a symbol as the first argument, to hook the address where the symbol lives. One
+very important usage of this is to extend the behavior of bisa’s built-in
+library SimProcedures. Since these library functions are just classes, you can
+subclass them, overriding pieces of their behavior, and then use your subclass
+in a hook.</p>
+</section>
+<section id="so-far-so-good">
+<h2>So far so good!<a class="headerlink" href="#so-far-so-good" title="Link to this heading">¶</a></h2>
+<p>By now, you should have a reasonable understanding of how to control the
+environment in which your analysis happens, on the level of the CLE loader and
+the bisa Project. You should also understand that bisa makes a reasonable
+attempt to simplify its analysis by hooking complex library functions with
+SimProcedures that summarize the effects of the functions.</p>
+<p>In order to see all the things you can do with the CLE loader and its backends,
+look at the <a class="reference external" href="https://docs.angr.io/projects/cle/en/latest/api.html">CLE API docs.</a></p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">bisa</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Core Concepts</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="toplevel.html">Core Concepts</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Loading a Binary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver.html">Symbolic Expressions and Constraint Solving</a></li>
+<li class="toctree-l2"><a class="reference internal" href="states.html">Machine State - memory, registers, and so on</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pathgroups.html">Simulation Managers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation.html">Simulation  and Instrumentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analyses.html">Analyses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symbolic.html">Symbolic Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="be_creative.html">A final word of advice</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../analyses/index.html">Build-in Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced-topics/index.html">Advanced Topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-bisa/index.html">Extending bisa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">bisa examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/index.html">Appendix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Core Concepts</a><ul>
+      <li>Previous: <a href="toplevel.html" title="previous chapter">Core Concepts</a></li>
+      <li>Next: <a href="solver.html" title="next chapter">Symbolic Expressions and Constraint Solving</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, The bisa Project contributors.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/core-concepts/loading.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

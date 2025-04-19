@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Simulation and Instrumentation &#8212; bisa  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Analyses" href="analyses.html" />
+    <link rel="prev" title="Simulation Managers" href="pathgroups.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="simulation-and-instrumentation">
+<h1>Simulation  and Instrumentation<a class="headerlink" href="#simulation-and-instrumentation" title="Link to this heading">¶</a></h1>
+<p>When you ask for a step of execution to happen in bisa, something has to
+actually perform the step. bisa uses a series of engines (subclasses of the
+<code class="docutils literal notranslate"><span class="pre">SimEngine</span></code> class) to emulate the effects that of a given section of code has
+on an input state. The execution core of bisa simply tries all the available
+engines in sequence, taking the first one that is able to handle the step. The
+following is the default list of engines, in order:</p>
+<ul class="simple">
+<li><p>The failure engine kicks in when the previous step took us to some
+uncontinuable state</p></li>
+<li><p>The syscall engine kicks in when the previous step ended in a syscall</p></li>
+<li><p>The hook engine kicks in when the current address is hooked</p></li>
+<li><p>The unicorn engine kicks in when the <code class="docutils literal notranslate"><span class="pre">UNICORN</span></code> state option is enabled and
+there is no symbolic data in the state</p></li>
+<li><p>The VEX engine kicks in as the final fallback.</p></li>
+</ul>
+<section id="simsuccessors">
+<h2>SimSuccessors<a class="headerlink" href="#simsuccessors" title="Link to this heading">¶</a></h2>
+<p>The code that actually tries all the engines in turn is
+<code class="docutils literal notranslate"><span class="pre">project.factory.successors(state,</span> <span class="pre">**kwargs)</span></code>, which passes its arguments onto
+each of the engines. This function is at the heart of <code class="docutils literal notranslate"><span class="pre">state.step()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">simulation_manager.step()</span></code>. It returns a SimSuccessors object, which we
+discussed briefly before. The purpose of SimSuccessors is to perform a simple
+categorization of the successor states, stored in various list attributes. They
+are:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute</p></th>
+<th class="head"><p>Guard Condition</p></th>
+<th class="head"><p>Instruction Pointer</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">successors</span></code></p></td>
+<td><p>True (can be symbolic, but constrained to True)</p></td>
+<td><p>Can be symbolic (but 256 solutions or less; see
+<code class="docutils literal notranslate"><span class="pre">unconstrained_successors</span></code>).</p></td>
+<td><p>A normal, satisfiable successor state to the state processed by the
+engine. The instruction pointer of this state may be symbolic (i.e., a
+computed jump based on user input), so the state might actually represent
+<em>several</em> potential continuations of execution going forward.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">unsat_successors</span></code></p></td>
+<td><p>False (can be symbolic, but constrained to False).</p></td>
+<td><p>Can be symbolic.</p></td>
+<td><p>Unsatisfiable successors. These are successors whose guard conditions can
+only be false (i.e., jumps that cannot be taken, or the default branch of
+jumps that <em>must</em> be taken).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">flat_successors</span></code></p></td>
+<td><p>True (can be symbolic, but constrained to True).</p></td>
+<td><p>Concrete value.</p></td>
+<td><p>As noted above, states in the <code class="docutils literal notranslate"><span class="pre">successors</span></code> list can have symbolic
+instruction pointers. This is rather confusing, as elsewhere in the code
+(i.e., in <code class="docutils literal notranslate"><span class="pre">SimEngineVEX.process</span></code>, when it’s time to step that state
+forward), we make assumptions that a single program state only represents
+the execution of a single spot in the code. To alleviate this, when we
+encounter states in <code class="docutils literal notranslate"><span class="pre">successors</span></code> with symbolic instruction pointers, we
+compute all possible concrete solutions (up to an arbitrary threshold of
+256) for them, and make a copy of the state for each such solution. We
+call this process “flattening”. These <code class="docutils literal notranslate"><span class="pre">flat_successors</span></code> are states,
+each of which has a different, concrete instruction pointer. For example,
+if the instruction pointer of a state in <code class="docutils literal notranslate"><span class="pre">successors</span></code> was <code class="docutils literal notranslate"><span class="pre">X+5</span></code>,
+where <code class="docutils literal notranslate"><span class="pre">X</span></code> had constraints of <code class="docutils literal notranslate"><span class="pre">X</span> <span class="pre">&gt;</span> <span class="pre">0x800000</span></code> and <code class="docutils literal notranslate"><span class="pre">X</span> <span class="pre">&lt;=</span> <span class="pre">0x800010</span></code>, we
+would flatten it into 16 different <code class="docutils literal notranslate"><span class="pre">flat_successors</span></code> states, one with
+an instruction pointer of <code class="docutils literal notranslate"><span class="pre">0x800006</span></code>, one with <code class="docutils literal notranslate"><span class="pre">0x800007</span></code>, and so on
+until <code class="docutils literal notranslate"><span class="pre">0x800015</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">unconstrained_successors</span></code></p></td>
+<td><p>True (can be symbolic, but constrained to True).</p></td>
+<td><p>Symbolic (with more than 256 solutions).</p></td>
+<td><p>During the flattening procedure described above, if it turns out that
+there are more than 256 possible solutions for the instruction pointer,
+we assume that the instruction pointer has been overwritten with
+unconstrained data (i.e., a stack overflow with user data). <em>This
+assumption is not sound in general</em>. Such states are placed in
+<code class="docutils literal notranslate"><span class="pre">unconstrained_successors</span></code> and not in <code class="docutils literal notranslate"><span class="pre">successors</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">all_successors</span></code></p></td>
+<td><p>Anything</p></td>
+<td><p>Can be symbolic.</p></td>
+<td><p>This is <code class="docutils literal notranslate"><span class="pre">successors</span> <span class="pre">+</span> <span class="pre">unsat_successors</span> <span class="pre">+</span> <span class="pre">unconstrained_successors</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="breakpoints">
+<h2>Breakpoints<a class="headerlink" href="#breakpoints" title="Link to this heading">¶</a></h2>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>rewrite this to fix the narrative</p>
+</div>
+<p>Like any decent execution engine, bisa supports breakpoints. This is pretty
+cool! A point is set as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">bisa</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">bisa</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="s1">&#39;examples/fauxware/fauxware&#39;</span><span class="p">)</span>
+
+<span class="go"># get our state</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">entry_state</span><span class="p">()</span>
+
+<span class="go"># add a breakpoint. This breakpoint will drop into ipdb right before a memory write happens.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inspect</span><span class="o">.</span><span class="n">b</span><span class="p">(</span><span class="s1">&#39;mem_write&#39;</span><span class="p">)</span>
+
+<span class="go"># on the other hand, we can have a breakpoint trigger right *after* a memory write happens.</span>
+<span class="go"># we can also have a callback function run instead of opening ipdb.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">debug_func</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;State </span><span class="si">%s</span><span class="s2"> is about to do a memory write!&quot;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inspect</span><span class="o">.</span><span class="n">b</span><span class="p">(</span><span class="s1">&#39;mem_write&#39;</span><span class="p">,</span> <span class="n">when</span><span class="o">=</span><span class="n">bisa</span><span class="o">.</span><span class="n">BP_AFTER</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="n">debug_func</span><span class="p">)</span>
+
+<span class="go"># or, you can have it drop you in an embedded IPython!</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inspect</span><span class="o">.</span><span class="n">b</span><span class="p">(</span><span class="s1">&#39;mem_write&#39;</span><span class="p">,</span> <span class="n">when</span><span class="o">=</span><span class="n">bisa</span><span class="o">.</span><span class="n">BP_AFTER</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="n">bisa</span><span class="o">.</span><span class="n">BP_IPYTHON</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>There are many other places to break than a memory write. Here is the list. You
+can break at BP_BEFORE or BP_AFTER for each of these events.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Event type</p></th>
+<th class="head"><p>Event meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>mem_read</p></td>
+<td><p>Memory is being read.</p></td>
+</tr>
+<tr class="row-odd"><td><p>mem_write</p></td>
+<td><p>Memory is being written.</p></td>
+</tr>
+<tr class="row-even"><td><p>address_concretization</p></td>
+<td><p>A symbolic memory access is being resolved.</p></td>
+</tr>
+<tr class="row-odd"><td><p>reg_read</p></td>
+<td><p>A register is being read.</p></td>
+</tr>
+<tr class="row-even"><td><p>reg_write</p></td>
+<td><p>A register is being written.</p></td>
+</tr>
+<tr class="row-odd"><td><p>tmp_read</p></td>
+<td><p>A temp is being read.</p></td>
+</tr>
+<tr class="row-even"><td><p>tmp_write</p></td>
+<td><p>A temp is being written.</p></td>
+</tr>
+<tr class="row-odd"><td><p>expr</p></td>
+<td><p>An expression is being created (i.e., a result of an arithmetic operation
+or a constant in the IR).</p></td>
+</tr>
+<tr class="row-even"><td><p>statement</p></td>
+<td><p>An IR statement is being translated.</p></td>
+</tr>
+<tr class="row-odd"><td><p>instruction</p></td>
+<td><p>A new (native) instruction is being translated.</p></td>
+</tr>
+<tr class="row-even"><td><p>irsb</p></td>
+<td><p>A new basic block is being translated.</p></td>
+</tr>
+<tr class="row-odd"><td><p>constraints</p></td>
+<td><p>New constraints are being added to the state.</p></td>
+</tr>
+<tr class="row-even"><td><p>exit</p></td>
+<td><p>A successor is being generated from execution.</p></td>
+</tr>
+<tr class="row-odd"><td><p>fork</p></td>
+<td><p>A symbolic execution state has forked into multiple states.</p></td>
+</tr>
+<tr class="row-even"><td><p>symbolic_variable</p></td>
+<td><p>A new symbolic variable is being created.</p></td>
+</tr>
+<tr class="row-odd"><td><p>call</p></td>
+<td><p>A call instruction is hit.</p></td>
+</tr>
+<tr class="row-even"><td><p>return</p></td>
+<td><p>A ret instruction is hit.</p></td>
+</tr>
+<tr class="row-odd"><td><p>simprocedure</p></td>
+<td><p>A simprocedure (or syscall) is executed.</p></td>
+</tr>
+<tr class="row-even"><td><p>dirty</p></td>
+<td><p>A dirty IR callback is executed.</p></td>
+</tr>
+<tr class="row-odd"><td><p>syscall</p></td>
+<td><p>A syscall is executed (called in addition to the simprocedure event).</p></td>
+</tr>
+<tr class="row-even"><td><p>engine_process</p></td>
+<td><p>A SimEngine is about to process some code.</p></td>
+</tr>
+</tbody>
+</table>
+<p>These events expose different attributes:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Event type</p></th>
+<th class="head"><p>Attribute name</p></th>
+<th class="head"><p>Attribute availability</p></th>
+<th class="head"><p>Attribute meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>mem_read</p></td>
+<td><p>mem_read_address</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The address at which memory is being read.</p></td>
+</tr>
+<tr class="row-odd"><td><p>mem_read</p></td>
+<td><p>mem_read_expr</p></td>
+<td><p>BP_AFTER</p></td>
+<td><p>The expression at that address.</p></td>
+</tr>
+<tr class="row-even"><td><p>mem_read</p></td>
+<td><p>mem_read_length</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The length of the memory read.</p></td>
+</tr>
+<tr class="row-odd"><td><p>mem_read</p></td>
+<td><p>mem_read_condition</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The condition of the memory read.</p></td>
+</tr>
+<tr class="row-even"><td><p>mem_write</p></td>
+<td><p>mem_write_address</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The address at which memory is being written.</p></td>
+</tr>
+<tr class="row-odd"><td><p>mem_write</p></td>
+<td><p>mem_write_length</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The length of the memory write.</p></td>
+</tr>
+<tr class="row-even"><td><p>mem_write</p></td>
+<td><p>mem_write_expr</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The expression that is being written.</p></td>
+</tr>
+<tr class="row-odd"><td><p>mem_write</p></td>
+<td><p>mem_write_condition</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The condition of the memory write.</p></td>
+</tr>
+<tr class="row-even"><td><p>reg_read</p></td>
+<td><p>reg_read_offset</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The offset of the register being read.</p></td>
+</tr>
+<tr class="row-odd"><td><p>reg_read</p></td>
+<td><p>reg_read_length</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The length of the register read.</p></td>
+</tr>
+<tr class="row-even"><td><p>reg_read</p></td>
+<td><p>reg_read_expr</p></td>
+<td><p>BP_AFTER</p></td>
+<td><p>The expression in the register.</p></td>
+</tr>
+<tr class="row-odd"><td><p>reg_read</p></td>
+<td><p>reg_read_condition</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The condition of the register read.</p></td>
+</tr>
+<tr class="row-even"><td><p>reg_write</p></td>
+<td><p>reg_write_offset</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The offset of the register being written.</p></td>
+</tr>
+<tr class="row-odd"><td><p>reg_write</p></td>
+<td><p>reg_write_length</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The length of the register write.</p></td>
+</tr>
+<tr class="row-even"><td><p>reg_write</p></td>
+<td><p>reg_write_expr</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The expression that is being written.</p></td>
+</tr>
+<tr class="row-odd"><td><p>reg_write</p></td>
+<td><p>reg_write_condition</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The condition of the register write.</p></td>
+</tr>
+<tr class="row-even"><td><p>tmp_read</p></td>
+<td><p>tmp_read_num</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The number of the temp being read.</p></td>
+</tr>
+<tr class="row-odd"><td><p>tmp_read</p></td>
+<td><p>tmp_read_expr</p></td>
+<td><p>BP_AFTER</p></td>
+<td><p>The expression of the temp.</p></td>
+</tr>
+<tr class="row-even"><td><p>tmp_write</p></td>
+<td><p>tmp_write_num</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The number of the temp written.</p></td>
+</tr>
+<tr class="row-odd"><td><p>tmp_write</p></td>
+<td><p>tmp_write_expr</p></td>
+<td><p>BP_AFTER</p></td>
+<td><p>The expression written to the temp.</p></td>
+</tr>
+<tr class="row-even"><td><p>expr</p></td>
+<td><p>expr</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The IR expression.</p></td>
+</tr>
+<tr class="row-odd"><td><p>expr</p></td>
+<td><p>expr_result</p></td>
+<td><p>BP_AFTER</p></td>
+<td><p>The value (e.g. AST) which the expression was evaluated to.</p></td>
+</tr>
+<tr class="row-even"><td><p>statement</p></td>
+<td><p>statement</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The index of the IR statement (in the IR basic block).</p></td>
+</tr>
+<tr class="row-odd"><td><p>instruction</p></td>
+<td><p>instruction</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The address of the native instruction.</p></td>
+</tr>
+<tr class="row-even"><td><p>irsb</p></td>
+<td><p>address</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The address of the basic block.</p></td>
+</tr>
+<tr class="row-odd"><td><p>constraints</p></td>
+<td><p>added_constraints</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The list of constraint expressions being added.</p></td>
+</tr>
+<tr class="row-even"><td><p>call</p></td>
+<td><p>function_address</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The name of the function being called.</p></td>
+</tr>
+<tr class="row-odd"><td><p>exit</p></td>
+<td><p>exit_target</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The expression representing the target of a SimExit.</p></td>
+</tr>
+<tr class="row-even"><td><p>exit</p></td>
+<td><p>exit_guard</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The expression representing the guard of a SimExit.</p></td>
+</tr>
+<tr class="row-odd"><td><p>exit</p></td>
+<td><p>exit_jumpkind</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The expression representing the kind of SimExit.</p></td>
+</tr>
+<tr class="row-even"><td><p>symbolic_variable</p></td>
+<td><p>symbolic_name</p></td>
+<td><p>BP_AFTER</p></td>
+<td><p>The name of the symbolic variable being created. The solver engine might
+modify this name (by appending a unique ID and length). Check the
+symbolic_expr for the final symbolic expression.</p></td>
+</tr>
+<tr class="row-odd"><td><p>symbolic_variable</p></td>
+<td><p>symbolic_size</p></td>
+<td><p>BP_AFTER</p></td>
+<td><p>The size of the symbolic variable being created.</p></td>
+</tr>
+<tr class="row-even"><td><p>symbolic_variable</p></td>
+<td><p>symbolic_expr</p></td>
+<td><p>BP_AFTER</p></td>
+<td><p>The expression representing the new symbolic variable.</p></td>
+</tr>
+<tr class="row-odd"><td><p>address_concretization</p></td>
+<td><p>address_concretization_strategy</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The SimConcretizationStrategy being used to resolve the address. This can
+be modified by the breakpoint handler to change the strategy that will be
+applied. If your breakpoint handler sets this to None, this strategy will
+be skipped.</p></td>
+</tr>
+<tr class="row-even"><td><p>address_concretization</p></td>
+<td><p>address_concretization_action</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The SimAction object being used to record the memory action.</p></td>
+</tr>
+<tr class="row-odd"><td><p>address_concretization</p></td>
+<td><p>address_concretization_memory</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The SimMemory object on which the action was taken.</p></td>
+</tr>
+<tr class="row-even"><td><p>address_concretization</p></td>
+<td><p>address_concretization_expr</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The AST representing the memory index being resolved. The breakpoint
+handler can modify this to affect the address being resolved.</p></td>
+</tr>
+<tr class="row-odd"><td><p>address_concretization</p></td>
+<td><p>address_concretization_add_constraints</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>Whether or not constraints should/will be added for this read.</p></td>
+</tr>
+<tr class="row-even"><td><p>address_concretization</p></td>
+<td><p>address_concretization_result</p></td>
+<td><p>BP_AFTER</p></td>
+<td><p>The list of resolved memory addresses (integers). The breakpoint handler
+can overwrite these to effect a different resolution result.</p></td>
+</tr>
+<tr class="row-odd"><td><p>syscall</p></td>
+<td><p>syscall_name</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The name of the system call.</p></td>
+</tr>
+<tr class="row-even"><td><p>simprocedure</p></td>
+<td><p>simprocedure_name</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The name of the simprocedure.</p></td>
+</tr>
+<tr class="row-odd"><td><p>simprocedure</p></td>
+<td><p>simprocedure_addr</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The address of the simprocedure.</p></td>
+</tr>
+<tr class="row-even"><td><p>simprocedure</p></td>
+<td><p>simprocedure_result</p></td>
+<td><p>BP_AFTER</p></td>
+<td><p>The return value of the simprocedure. You can also <em>override</em> it in
+BP_BEFORE, which will cause the actual simprocedure to be skipped and for
+your return value to be used instead.</p></td>
+</tr>
+<tr class="row-odd"><td><p>simprocedure</p></td>
+<td><p>simprocedure</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The actual SimProcedure object.</p></td>
+</tr>
+<tr class="row-even"><td><p>dirty</p></td>
+<td><p>dirty_name</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The name of the dirty call.</p></td>
+</tr>
+<tr class="row-odd"><td><p>dirty</p></td>
+<td><p>dirty_handler</p></td>
+<td><p>BP_BEFORE</p></td>
+<td><p>The function that will be run to handle the dirty call. You can override
+this.</p></td>
+</tr>
+<tr class="row-even"><td><p>dirty</p></td>
+<td><p>dirty_args</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The address of the dirty.</p></td>
+</tr>
+<tr class="row-odd"><td><p>dirty</p></td>
+<td><p>dirty_result</p></td>
+<td><p>BP_AFTER</p></td>
+<td><p>The return value of the dirty call. You can also <em>override</em> it in
+BP_BEFORE, which will cause the actual dirty call to be skipped and for
+your return value to be used instead.</p></td>
+</tr>
+<tr class="row-even"><td><p>engine_process</p></td>
+<td><p>sim_engine</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The SimEngine that is processing.</p></td>
+</tr>
+<tr class="row-odd"><td><p>engine_process</p></td>
+<td><p>successors</p></td>
+<td><p>BP_BEFORE or BP_AFTER</p></td>
+<td><p>The SimSuccessors object defining the result of the engine.</p></td>
+</tr>
+</tbody>
+</table>
+<p>These attributes can be accessed as members of <code class="docutils literal notranslate"><span class="pre">state.inspect</span></code> during the
+appropriate breakpoint callback to access the appropriate values. You can even
+modify these value to modify further uses of the values!</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">track_reads</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Read&#39;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">inspect</span><span class="o">.</span><span class="n">mem_read_expr</span><span class="p">,</span> <span class="s1">&#39;from&#39;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">inspect</span><span class="o">.</span><span class="n">mem_read_address</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inspect</span><span class="o">.</span><span class="n">b</span><span class="p">(</span><span class="s1">&#39;mem_read&#39;</span><span class="p">,</span> <span class="n">when</span><span class="o">=</span><span class="n">bisa</span><span class="o">.</span><span class="n">BP_AFTER</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="n">track_reads</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Additionally, each of these properties can be used as a keyword argument to
+<code class="docutils literal notranslate"><span class="pre">inspect.b</span></code> to make the breakpoint conditional:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># This will break before a memory write if 0x1000 is a possible value of its target expression</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">s</span><span class="o">.</span><span class="n">inspect</span><span class="o">.</span><span class="n">b</span><span class="p">(</span><span class="s1">&#39;mem_write&#39;</span><span class="p">,</span> <span class="n">mem_write_address</span><span class="o">=</span><span class="mh">0x1000</span><span class="p">)</span>
+
+<span class="c1"># This will break before a memory write if 0x1000 is the *only* value of its target expression</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">s</span><span class="o">.</span><span class="n">inspect</span><span class="o">.</span><span class="n">b</span><span class="p">(</span><span class="s1">&#39;mem_write&#39;</span><span class="p">,</span> <span class="n">mem_write_address</span><span class="o">=</span><span class="mh">0x1000</span><span class="p">,</span> <span class="n">mem_write_address_unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># This will break after instruction 0x8000, but only 0x1000 is a possible value of the last expression that was read from memory</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">s</span><span class="o">.</span><span class="n">inspect</span><span class="o">.</span><span class="n">b</span><span class="p">(</span><span class="s1">&#39;instruction&#39;</span><span class="p">,</span> <span class="n">when</span><span class="o">=</span><span class="n">bisa</span><span class="o">.</span><span class="n">BP_AFTER</span><span class="p">,</span> <span class="n">instruction</span><span class="o">=</span><span class="mh">0x8000</span><span class="p">,</span> <span class="n">mem_read_expr</span><span class="o">=</span><span class="mh">0x1000</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Cool stuff! In fact, we can even specify a function as a condition:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># this is a complex condition that could do anything! In this case, it makes sure that RAX is 0x41414141 and</span>
+<span class="c1"># that the basic block starting at 0x8004 was executed sometime in this path&#39;s history</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">def</span><span class="w"> </span><span class="nf">cond</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
+<span class="o">...</span>     <span class="k">return</span> <span class="n">state</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rax</span><span class="p">,</span> <span class="n">cast_to</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;AAAA&#39;</span> <span class="ow">and</span> <span class="mh">0x8004</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">inspect</span><span class="o">.</span><span class="n">backtrace</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">s</span><span class="o">.</span><span class="n">inspect</span><span class="o">.</span><span class="n">b</span><span class="p">(</span><span class="s1">&#39;mem_write&#39;</span><span class="p">,</span> <span class="n">condition</span><span class="o">=</span><span class="n">cond</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>That is some cool stuff!</p>
+<section id="caution-about-mem-read-breakpoint">
+<h3>Caution about <code class="docutils literal notranslate"><span class="pre">mem_read</span></code> breakpoint<a class="headerlink" href="#caution-about-mem-read-breakpoint" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">mem_read</span></code> breakpoint gets triggered anytime there are memory reads by
+either the executing program or the binary analysis. If you are using breakpoint
+on <code class="docutils literal notranslate"><span class="pre">mem_read</span></code> and also using <code class="docutils literal notranslate"><span class="pre">state.mem</span></code> to load data from memory addresses,
+then know that the breakpoint will be fired as you are technically reading
+memory.</p>
+<p>So if you want to load data from memory and not trigger any <code class="docutils literal notranslate"><span class="pre">mem_read</span></code>
+breakpoint you have had set up, then use <code class="docutils literal notranslate"><span class="pre">state.memory.load</span></code> with the keyword
+arguments <code class="docutils literal notranslate"><span class="pre">disable_actions=True</span></code> and <code class="docutils literal notranslate"><span class="pre">inspect=False</span></code>.</p>
+<p>This is also true for <code class="docutils literal notranslate"><span class="pre">state.find</span></code> and you can use the same keyword arguments
+to prevent <code class="docutils literal notranslate"><span class="pre">mem_read</span></code> breakpoints from firing.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">bisa</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Core Concepts</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="toplevel.html">Core Concepts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="loading.html">Loading a Binary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver.html">Symbolic Expressions and Constraint Solving</a></li>
+<li class="toctree-l2"><a class="reference internal" href="states.html">Machine State - memory, registers, and so on</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pathgroups.html">Simulation Managers</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Simulation  and Instrumentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analyses.html">Analyses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symbolic.html">Symbolic Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="be_creative.html">A final word of advice</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../analyses/index.html">Build-in Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced-topics/index.html">Advanced Topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-bisa/index.html">Extending bisa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">bisa examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/index.html">Appendix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Core Concepts</a><ul>
+      <li>Previous: <a href="pathgroups.html" title="previous chapter">Simulation Managers</a></li>
+      <li>Next: <a href="analyses.html" title="next chapter">Analyses</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, The bisa Project contributors.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/core-concepts/simulation.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

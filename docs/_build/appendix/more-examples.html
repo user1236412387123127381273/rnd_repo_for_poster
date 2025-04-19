@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>CTF Challenge Examples &#8212; bisa  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Changelog" href="changelog.html" />
+    <link rel="prev" title="List of State Options" href="options.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="ctf-challenge-examples">
+<h1>CTF Challenge Examples<a class="headerlink" href="#ctf-challenge-examples" title="Link to this heading">¶</a></h1>
+<p>bisa is very often used in CTFs. These are example scripts resulting from that
+use, mostly from Shellphish but also from many others.</p>
+<section id="reverseme-example-hackcon-2016-bisay-reverser">
+<h2>ReverseMe example: HackCon 2016 - bisay-reverser<a class="headerlink" href="#reverseme-example-hackcon-2016-bisay-reverser" title="Link to this heading">¶</a></h2>
+<p>Script author: Stanislas Lejay (github: <a class="reference external" href="https://github.com/P1kachu">&#64;P1kachu</a>)</p>
+<p>Script runtime: ~31 minutes</p>
+<p>Here is the <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/hackcon2016_bisay-reverser/yolomolo">binary</a>
+and the <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/hackcon2016_bisay-reverser/solve.py">script</a></p>
+</section>
+<section id="reverseme-example-securityfest-2016-fairlight">
+<h2>ReverseMe example: SecurityFest 2016 - fairlight<a class="headerlink" href="#reverseme-example-securityfest-2016-fairlight" title="Link to this heading">¶</a></h2>
+<p>Script author: chuckleberryfinn (github: <a class="reference external" href="https://github.com/chuckleberryfinn">&#64;chuckleberryfinn</a>)</p>
+<p>Script runtime: ~20 seconds</p>
+<p>A simple reverse me that takes a key as a command line argument and checks it
+against 14 checks. Possible to solve the challenge using bisa without reversing
+any of the checks.</p>
+<p>Here is the <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/securityfest_fairlight/fairlight">binary</a>
+and the <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/securityfest_fairlight/solve.py">script</a></p>
+</section>
+<section id="reverseme-example-defcon-quals-2016-baby-re">
+<h2>ReverseMe example: DEFCON Quals 2016 - baby-re<a class="headerlink" href="#reverseme-example-defcon-quals-2016-baby-re" title="Link to this heading">¶</a></h2>
+<p>Authors David Manouchehri (github: <a class="reference external" href="https://github.com/Manouchehri">&#64;Manouchehri</a>),
+Stanislas Lejay (github: <a class="reference external" href="https://github.com/P1kachu">&#64;P1kachu</a>) and Audrey Dutcher (github: &#64;rhelmot).</p>
+<p>Script runtime: 10 sec</p>
+<p>Here is the <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/defcon2016quals_baby-re/baby-re">binary</a>
+and the <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/defcon2016quals_baby-re/solve.py">script</a></p>
+</section>
+<section id="reverseme-example-google-ctf-unbreakable-enterprise-product-activation-150-points">
+<h2>ReverseMe example: Google CTF - Unbreakable Enterprise Product Activation (150 points)<a class="headerlink" href="#reverseme-example-google-ctf-unbreakable-enterprise-product-activation-150-points" title="Link to this heading">¶</a></h2>
+<p>Script 0 author: David Manouchehri (github: <a class="reference external" href="https://github.com/Manouchehri">&#64;Manouchehri</a>)</p>
+<p>Script runtime: 4.5 sec</p>
+<p>Script 1 author: Adam Van Prooyen (github: <a class="reference external" href="https://github.com/docileninja">&#64;docileninja</a>)</p>
+<p>Script runtime: 6.7 sec</p>
+<p>A Linux binary that takes a key as a command line argument and checks it against
+a series of constraints.</p>
+<p>Challenge Description:</p>
+<blockquote>
+<div><p>We need help activating this product – we’ve lost our license key :(</p>
+<p>You’re our only hope!</p>
+</div></blockquote>
+<p>Here are the binary and scripts: <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/google2016_unbreakable_0">script 0</a>, <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/google2016_unbreakable_1">script_1</a></p>
+</section>
+<section id="reverseme-example-ekoparty-ctf-fuckzing-reverse-250-points">
+<h2>ReverseMe example: EKOPARTY CTF - Fuckzing reverse (250 points)<a class="headerlink" href="#reverseme-example-ekoparty-ctf-fuckzing-reverse-250-points" title="Link to this heading">¶</a></h2>
+<p>Author: Adam Van Prooyen (github: <a class="reference external" href="https://github.com/docileninja">&#64;docileninja</a>)</p>
+<p>Script runtime: 29 sec</p>
+<p>A Linux binary that takes a team name as input and checks it against a series of
+constraints.</p>
+<p>Challenge Description:</p>
+<blockquote>
+<div><p>Hundreds of conditions to be meet, will you be able to surpass them?</p>
+</div></blockquote>
+<p>Both sample binaries and the script are located <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/ekopartyctf2016_rev250">here</a>
+and additional information be found at the author’s <a class="reference external" href="http://van.prooyen.com/reversing/2016/10/30/Fuckzing-reverse-Writeup.html">write-up</a>.</p>
+</section>
+<section id="reverseme-example-whitehat-grant-prix-global-challenge-2015-re400">
+<h2>ReverseMe example: WhiteHat Grant Prix Global Challenge 2015 - Re400<a class="headerlink" href="#reverseme-example-whitehat-grant-prix-global-challenge-2015-re400" title="Link to this heading">¶</a></h2>
+<p>Author: Fish Wang (github: &#64;ltfish)</p>
+<p>Script runtime: 5.5 sec</p>
+<p>A Windows binary that takes a flag as argument, and tells you if the flag is
+correct or not.</p>
+<p>“I have to patch out some checks that are difficult for bisa to solve (e.g., it
+uses some bytes of the flag to decrypt some data, and see if those data are
+legit Windows APIs). Other than that, bisa works really well for solving this
+challenge.”</p>
+<p>The <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/whitehatvn2015_re400/re400.exe">binary</a>
+and the <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/whitehatvn2015_re400/solve.py">script</a>.</p>
+</section>
+<section id="reverseme-example-ekoparty-ctf-2015-rev-100">
+<h2>ReverseMe example: EKOPARTY CTF 2015 - rev 100<a class="headerlink" href="#reverseme-example-ekoparty-ctf-2015-rev-100" title="Link to this heading">¶</a></h2>
+<p>Author: Fish Wang (github: &#64;ltfish)</p>
+<p>Script runtime: 5.5 sec</p>
+<p>This is a painful challenge to solve with bisa. I should have done things in a
+smarter way.</p>
+<p>Here is the <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/ekopartyctf2015_rev100/counter">binary</a>
+and the <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/ekopartyctf2015_rev100/solve.py">script</a>.</p>
+</section>
+<section id="reverseme-example-asis-ctf-finals-2015-fake">
+<h2>ReverseMe example: ASIS CTF Finals 2015 - fake<a class="headerlink" href="#reverseme-example-asis-ctf-finals-2015-fake" title="Link to this heading">¶</a></h2>
+<p>Author: Fish Wang (github: &#64;ltfish)</p>
+<p>Script runtime: 1 min 57 sec</p>
+<p>The solution is pretty straight-forward.</p>
+<p>The <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/asisctffinals2015_fake/fake">binary</a>
+and the <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/asisctffinals2015_fake/solve.py">script</a>.</p>
+</section>
+<section id="reverseme-example-defcamp-ctf-qualification-2015-reversing-100">
+<h2>ReverseMe example: Defcamp CTF Qualification 2015 - Reversing 100<a class="headerlink" href="#reverseme-example-defcamp-ctf-qualification-2015-reversing-100" title="Link to this heading">¶</a></h2>
+<p>Author: Fish Wang (github: &#64;ltfish)</p>
+<p>bisa solves this challenge with almost zero user-interference.</p>
+<p>See the <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/defcamp_r100/solve.py">script</a>
+and the <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/defcamp_r100/r100">binary</a>.</p>
+</section>
+<section id="reverseme-example-defcamp-ctf-qualification-2015-reversing-200">
+<h2>ReverseMe example: Defcamp CTF Qualification 2015 - Reversing 200<a class="headerlink" href="#reverseme-example-defcamp-ctf-qualification-2015-reversing-200" title="Link to this heading">¶</a></h2>
+<p>Author: Fish Wang (github: &#64;ltfish)</p>
+<p>bisa solves this challenge with almost zero user-interference. Veritesting is
+required to retrieve the flag promptly.</p>
+<p>The <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/defcamp_r200/solve.py">script</a>
+and the <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/defcamp_r200/r200">binary</a>. It
+takes a few minutes to run on my laptop.</p>
+</section>
+<section id="reverseme-example-mma-ctf-2015-howtouse">
+<h2>ReverseMe example: MMA CTF 2015 - HowToUse<a class="headerlink" href="#reverseme-example-mma-ctf-2015-howtouse" title="Link to this heading">¶</a></h2>
+<p>Author: Audrey Dutcher (github: &#64;rhelmot)</p>
+<p>We solved this simple reversing challenge with bisa, since we were too lazy to
+reverse it or run it in Windows. The resulting <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/mma_howtouse/solve.py">script</a>
+shows how we grabbed the flag out of the <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/mma_howtouse/howtouse.dll">DLL</a>.</p>
+</section>
+<section id="crackme-example-mma-ctf-2015-simplehash">
+<h2>CrackMe example: MMA CTF 2015 - SimpleHash<a class="headerlink" href="#crackme-example-mma-ctf-2015-simplehash" title="Link to this heading">¶</a></h2>
+<p>Author: Chris Salls (github: &#64;salls)</p>
+<p>This crackme is 95% solvable with bisa, but we did have to overcome some
+difficulties. The <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/mma_simplehash/solve.py">script</a>
+describes the difficulties that were encountered and how we worked around them.
+The binary can be found <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/mma_simplehash/simple_hash">here</a>.</p>
+</section>
+<section id="reverseme-example-flareon-2015-challenge-10">
+<h2>ReverseMe example: FlareOn 2015 - Challenge 10<a class="headerlink" href="#reverseme-example-flareon-2015-challenge-10" title="Link to this heading">¶</a></h2>
+<p>Author: Fish Wang (github: &#64;ltfish)</p>
+<p>bisa acts as a binary loader and an emulator in solving this challenge. I didn’t
+have to load the driver onto my Windows box.</p>
+<p>The <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/flareon2015_10/solve.py">script</a>
+demonstrates how to hook at arbitrary program points without affecting the
+intended bytes to be executed (a zero-length hook). It also shows how to read
+bytes out of memory and decode as a string.</p>
+<p>By the way, here is the <a class="reference external" href="https://www.fireeye.com/content/dam/fireeye-www/global/en/blog/threat-research/flareon/2015solution10.pdf">link</a>
+to the intended solution from FireEye.</p>
+</section>
+<section id="reverseme-example-flareon-2015-challenge-2">
+<h2>ReverseMe example: FlareOn 2015 - Challenge 2<a class="headerlink" href="#reverseme-example-flareon-2015-challenge-2" title="Link to this heading">¶</a></h2>
+<p>Author: Chris Salls (github: &#64;salls)</p>
+<p>This <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/flareon2015_2/very_success">reversing challenge</a>
+is simple to solve almost entirely with bisa, and a lot faster than trying to
+reverse the password checking function. The script is <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/flareon2015_2/solve.py">here</a></p>
+</section>
+<section id="reverseme-example-0ctf-2016-momo">
+<h2>ReverseMe example: 0ctf 2016 - momo<a class="headerlink" href="#reverseme-example-0ctf-2016-momo" title="Link to this heading">¶</a></h2>
+<p>Author: Fish Wang (github: &#64;ltfish), ocean (github: &#64;ocean1)</p>
+<p>This challenge is a <a class="reference external" href="https://github.com/xoreaxeaxeax/movfuscator">movfuscated</a>
+binary. To find the correct password after exploring the binary with Qira it is
+possible to understand how to find the places in the binary where every
+character is checked using capstone and using bisa to load the <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/0ctf_momo_3/solve.py">binary</a>
+and brute-force the single characters of the flag. Be aware that the <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/0ctf_momo_3/solve.py">script</a>
+is really slow. Runtime: &gt; 1 hour.</p>
+</section>
+<section id="crackme-example-9447-ctf-2015-reversing-330-nobranch">
+<h2>CrackMe example: 9447 CTF 2015 - Reversing 330, “nobranch”<a class="headerlink" href="#crackme-example-9447-ctf-2015-reversing-330-nobranch" title="Link to this heading">¶</a></h2>
+<p>Author: Audrey Dutcher (github: &#64;rhelmot)</p>
+<p>bisa cannot currently solve this problem natively, as the problem is too complex
+for z3 to solve. Formatting the constraints to z3 a little differently allows z3
+to come up with an answer relatively quickly. (I was asleep while it was
+solving, so I don’t know exactly how long!) The script for this is <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/9447_nobranch/solve.py">here</a>
+and the binary is <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/9447_nobranch/nobranch">here</a>.</p>
+</section>
+<section id="crackme-example-ais3-crackme">
+<h2>CrackMe example: ais3_crackme<a class="headerlink" href="#crackme-example-ais3-crackme" title="Link to this heading">¶</a></h2>
+<p>Author: Antonio Bianchi, Tyler Nighswander</p>
+<p>ais3_crackme has been developed by Tyler Nighswander (tylerni7) for ais3 summer
+school. It is an easy crackme challenge, checking its command line argument.</p>
+</section>
+<section id="reverseme-modern-binary-exploitation-csci-4968">
+<h2>ReverseMe: Modern Binary Exploitation - CSCI 4968<a class="headerlink" href="#reverseme-modern-binary-exploitation-csci-4968" title="Link to this heading">¶</a></h2>
+<p>Author: David Manouchehri (GitHub <a class="reference external" href="https://github.com/Manouchehri">&#64;Manouchehri</a>)</p>
+<p><a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/CSCI-4968-MBE/challenges">This folder</a>
+contains scripts used to solve some of the challenges with bisa. At the moment
+it only contains the examples from the IOLI crackme suite, but eventually other
+solutions will be added.</p>
+</section>
+<section id="crackme-example-android-license-check">
+<h2>CrackMe example: Android License Check<a class="headerlink" href="#crackme-example-android-license-check" title="Link to this heading">¶</a></h2>
+<p>Author: Bernhard Mueller (GitHub <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/">&#64;b-mueller</a>)</p>
+<p>A <a class="reference external" href="https://github.com/bisa/bisa-examples/tree/master/examples/android_arm_license_validation">native binary for Android/ARM</a>
+that validates a license key passed as a command line argument. It was created
+for the symbolic execution tutorial in the <a class="reference external" href="https://github.com/OWASP/owasp-mstg/">OWASP Mobile Testing Guide</a>.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">bisa</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core-concepts/index.html">Core Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyses/index.html">Build-in Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced-topics/index.html">Advanced Topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-bisa/index.html">Extending bisa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">bisa examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Appendix</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="cheatsheet.html">Cheatsheet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ops.html">List of Claripy Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="options.html">List of State Options</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">CTF Challenge Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migration-9.1.html">Migrating to bisa 9.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migration-8.html">Migrating to bisa 8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migration-7.html">Migrating to bisa 7</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Appendix</a><ul>
+      <li>Previous: <a href="options.html" title="previous chapter">List of State Options</a></li>
+      <li>Next: <a href="changelog.html" title="next chapter">Changelog</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, The bisa Project contributors.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/appendix/more-examples.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

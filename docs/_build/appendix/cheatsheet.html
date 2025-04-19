@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Cheatsheet &#8212; bisa  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="List of Claripy Operations" href="ops.html" />
+    <link rel="prev" title="Appendix" href="index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="cheatsheet">
+<h1>Cheatsheet<a class="headerlink" href="#cheatsheet" title="Link to this heading">¶</a></h1>
+<p>The following cheatsheet aims to give an overview of various things you can do
+with bisa and act as a quick reference to check the syntax for something without
+having to dig through the deeper docs.</p>
+<section id="general-getting-started">
+<h2>General getting started<a class="headerlink" href="#general-getting-started" title="Link to this heading">¶</a></h2>
+<p>Some useful imports</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">bisa</span> <span class="c1">#the main framework</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">claripy</span> <span class="c1">#the solver engine</span>
+</pre></div>
+</div>
+<p>Loading the binary</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">proj</span> <span class="o">=</span> <span class="n">bisa</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="s2">&quot;/path/to/binary&quot;</span><span class="p">,</span> <span class="n">auto_load_libs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1"># auto_load_libs False for improved performance</span>
+</pre></div>
+</div>
+</section>
+<section id="states">
+<h2>States<a class="headerlink" href="#states" title="Link to this heading">¶</a></h2>
+<p>Create a SimState object</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">entry_state</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="simulation-managers">
+<h2>Simulation Managers<a class="headerlink" href="#simulation-managers" title="Link to this heading">¶</a></h2>
+<p>Generate a simulation manager object</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simgr</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">simulation_manager</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="exploring-and-analysing-states">
+<h2>Exploring and analysing states<a class="headerlink" href="#exploring-and-analysing-states" title="Link to this heading">¶</a></h2>
+<p>Choosing a different Exploring strategy</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simgr</span><span class="o">.</span><span class="n">use_technique</span><span class="p">(</span><span class="n">bisa</span><span class="o">.</span><span class="n">exploration_techniques</span><span class="o">.</span><span class="n">DFS</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Symbolically execute until we find a state satisfying our <code class="docutils literal notranslate"><span class="pre">find=</span></code> and <code class="docutils literal notranslate"><span class="pre">avoid=</span></code> parameters</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">avoid_addr</span> <span class="o">=</span> <span class="p">[</span><span class="mh">0x400c06</span><span class="p">,</span> <span class="mh">0x400bc7</span><span class="p">]</span>
+<span class="n">find_addr</span> <span class="o">=</span> <span class="mh">0x400c10d</span>
+<span class="n">simgr</span><span class="o">.</span><span class="n">explore</span><span class="p">(</span><span class="n">find</span><span class="o">=</span><span class="n">find_addr</span><span class="p">,</span> <span class="n">avoid</span><span class="o">=</span><span class="n">avoid_addr</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">found</span> <span class="o">=</span> <span class="n">simgr</span><span class="o">.</span><span class="n">found</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># A state that reached the find condition from explore</span>
+<span class="n">found</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">sym_arg</span><span class="p">,</span> <span class="n">cast_to</span><span class="o">=</span><span class="nb">bytes</span><span class="p">)</span> <span class="c1"># Return a concrete string value for the sym arg to reach this state</span>
+</pre></div>
+</div>
+<p>Symbolically execute until lambda expression is <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simgr</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">until</span><span class="o">=</span><span class="k">lambda</span> <span class="n">sm</span><span class="p">:</span> <span class="n">sm</span><span class="o">.</span><span class="n">active</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">addr</span> <span class="o">&gt;=</span> <span class="n">first_jmp</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is especially useful with the ability to access the current STDOUT or
+STDERR (1 here is the File Descriptor for STDOUT)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simgr</span><span class="o">.</span><span class="n">explore</span><span class="p">(</span><span class="n">find</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="s2">&quot;correct&quot;</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">posix</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Memory Management on big searches (Auto Drop Stashes):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simgr</span><span class="o">.</span><span class="n">explore</span><span class="p">(</span><span class="n">find</span><span class="o">=</span><span class="n">find_addr</span><span class="p">,</span> <span class="n">avoid</span><span class="o">=</span><span class="n">avoid_addr</span><span class="p">,</span> <span class="n">step_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">lsm</span><span class="p">:</span> <span class="n">lsm</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">stash</span><span class="o">=</span><span class="s1">&#39;avoid&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<section id="manually-exploring">
+<h3>Manually Exploring<a class="headerlink" href="#manually-exploring" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simgr</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">step_func</span><span class="o">=</span><span class="n">step_func</span><span class="p">,</span> <span class="n">until</span><span class="o">=</span><span class="k">lambda</span> <span class="n">lsm</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">sm</span><span class="o">.</span><span class="n">found</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">step_func</span><span class="p">(</span><span class="n">lsm</span><span class="p">):</span>
+    <span class="n">lsm</span><span class="o">.</span><span class="n">stash</span><span class="p">(</span><span class="n">filter_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">state</span><span class="p">:</span> <span class="n">state</span><span class="o">.</span><span class="n">addr</span> <span class="o">==</span> <span class="mh">0x400c06</span><span class="p">,</span> <span class="n">from_stash</span><span class="o">=</span><span class="s1">&#39;active&#39;</span><span class="p">,</span> <span class="n">to_stash</span><span class="o">=</span><span class="s1">&#39;avoid&#39;</span><span class="p">)</span>
+    <span class="n">lsm</span><span class="o">.</span><span class="n">stash</span><span class="p">(</span><span class="n">filter_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">state</span><span class="p">:</span> <span class="n">state</span><span class="o">.</span><span class="n">addr</span> <span class="o">==</span> <span class="mh">0x400bc7</span><span class="p">,</span> <span class="n">from_stash</span><span class="o">=</span><span class="s1">&#39;active&#39;</span><span class="p">,</span> <span class="n">to_stash</span><span class="o">=</span><span class="s1">&#39;avoid&#39;</span><span class="p">)</span>
+    <span class="n">lsm</span><span class="o">.</span><span class="n">stash</span><span class="p">(</span><span class="n">filter_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">state</span><span class="p">:</span> <span class="n">state</span><span class="o">.</span><span class="n">addr</span> <span class="o">==</span> <span class="mh">0x400c10</span><span class="p">,</span> <span class="n">from_stash</span><span class="o">=</span><span class="s1">&#39;active&#39;</span><span class="p">,</span> <span class="n">to_stash</span><span class="o">=</span><span class="s1">&#39;found&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">lsm</span>
+</pre></div>
+</div>
+<p>Enable Logging output from Simulation Manager:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;bisa.sim_manager&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="stashes">
+<h3>Stashes<a class="headerlink" href="#stashes" title="Link to this heading">¶</a></h3>
+<p>Move Stash:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simgr</span><span class="o">.</span><span class="n">stash</span><span class="p">(</span><span class="n">from_stash</span><span class="o">=</span><span class="s2">&quot;found&quot;</span><span class="p">,</span> <span class="n">to_stash</span><span class="o">=</span><span class="s2">&quot;active&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Drop Stashes:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simgr</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">stash</span><span class="o">=</span><span class="s2">&quot;avoid&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="constraint-solver-claripy">
+<h2>Constraint Solver (claripy)<a class="headerlink" href="#constraint-solver-claripy" title="Link to this heading">¶</a></h2>
+<p>Create symbolic object</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sym_arg_size</span> <span class="o">=</span> <span class="mi">15</span> <span class="c1">#Length in Bytes because we will multiply with 8 later</span>
+<span class="n">sym_arg</span> <span class="o">=</span> <span class="n">claripy</span><span class="o">.</span><span class="n">BVS</span><span class="p">(</span><span class="s1">&#39;sym_arg&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="o">*</span><span class="n">sym_arg_size</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Restrict sym_arg to typical char range</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">byte</span> <span class="ow">in</span> <span class="n">sym_arg</span><span class="o">.</span><span class="n">chop</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
+    <span class="n">initial_state</span><span class="o">.</span><span class="n">add_constraints</span><span class="p">(</span><span class="n">byte</span> <span class="o">&gt;=</span> <span class="s1">&#39;</span><span class="se">\x20</span><span class="s1">&#39;</span><span class="p">)</span> <span class="c1"># &#39; &#39;</span>
+    <span class="n">initial_state</span><span class="o">.</span><span class="n">add_constraints</span><span class="p">(</span><span class="n">byte</span> <span class="o">&lt;=</span> <span class="s1">&#39;</span><span class="se">\x7e</span><span class="s1">&#39;</span><span class="p">)</span> <span class="c1"># &#39;~&#39;</span>
+</pre></div>
+</div>
+<p>Create a state with a symbolic argument</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">argv</span> <span class="o">=</span> <span class="p">[</span><span class="n">proj</span><span class="o">.</span><span class="n">filename</span><span class="p">]</span>
+<span class="n">argv</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sym_arg</span><span class="p">)</span>
+<span class="n">state</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">entry_state</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">argv</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use argument for solving:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sym_arg</span> <span class="o">=</span> <span class="n">bisa</span><span class="o">.</span><span class="n">claripy</span><span class="o">.</span><span class="n">BVS</span><span class="p">(</span><span class="s2">&quot;sym_arg&quot;</span><span class="p">,</span> <span class="n">flag_size</span> <span class="o">*</span> <span class="mi">8</span><span class="p">)</span>
+<span class="n">argv</span> <span class="o">=</span> <span class="p">[</span><span class="n">proj</span><span class="o">.</span><span class="n">filename</span><span class="p">]</span>
+<span class="n">argv</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sym_arg</span><span class="p">)</span>
+<span class="n">initial_state</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">full_init_state</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">argv</span><span class="p">,</span> <span class="n">add_options</span><span class="o">=</span><span class="n">bisa</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">unicorn</span><span class="p">,</span> <span class="n">remove_options</span><span class="o">=</span><span class="p">{</span><span class="n">bisa</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">LAZY_SOLVES</span><span class="p">})</span>
+</pre></div>
+</div>
+</section>
+<section id="ffi-and-hooking">
+<h2>FFI and Hooking<a class="headerlink" href="#ffi-and-hooking" title="Link to this heading">¶</a></h2>
+<p>Calling a function from ipython</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">callable</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+<span class="n">f</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">x</span><span class="o">=</span><span class="n">claripy</span><span class="o">.</span><span class="n">BVS</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
+<span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="c1">#TODO: Find out how to make that result readable</span>
+</pre></div>
+</div>
+<p>If what you are interested in is not directly returned because for example the
+function returns the pointer to a buffer you can access the state after the
+function returns with</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">result_state</span>
+<span class="go">&lt;SimState @ 0x1000550&gt;</span>
+</pre></div>
+</div>
+<p>Hooking</p>
+<p>There are already predefined hooks for libc functions (useful for statically
+compiled libraries)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">proj</span> <span class="o">=</span> <span class="n">bisa</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="s1">&#39;/path/to/binary&#39;</span><span class="p">,</span> <span class="n">use_sim_procedures</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">proj</span><span class="o">.</span><span class="n">hook</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="n">bisa</span><span class="o">.</span><span class="n">SIM_PROCEDURES</span><span class="p">[</span><span class="s1">&#39;libc&#39;</span><span class="p">][</span><span class="s1">&#39;atoi&#39;</span><span class="p">]())</span>
+</pre></div>
+</div>
+<p>Hooking with Simprocedure:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">fixpid</span><span class="p">(</span><span class="n">bisa</span><span class="o">.</span><span class="n">SimProcedure</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mh">0x30</span>
+
+<span class="n">proj</span><span class="o">.</span><span class="n">hook</span><span class="p">(</span><span class="mh">0x4008cd</span><span class="p">,</span> <span class="n">fixpid</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+<section id="other-useful-tricks">
+<h2>Other useful tricks<a class="headerlink" href="#other-useful-tricks" title="Link to this heading">¶</a></h2>
+<p>Drop into an ipython if a ctr+c is received (useful for debugging scripts that
+are running forever)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">signal</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">killmyself</span><span class="p">():</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;kill </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">())</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sigint_handler</span><span class="p">(</span><span class="n">signum</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="nb">print</span> <span class="s1">&#39;Stopping Execution for Debug. If you want to kill the program issue: killmyself()&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="s2">&quot;IPython&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">IPython</span>
+        <span class="n">IPython</span><span class="o">.</span><span class="n">embed</span><span class="p">()</span>
+
+<span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">sigint_handler</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Get the calltrace of a state to find out where we got stuck</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">simgr</span><span class="o">.</span><span class="n">active</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="nb">print</span> <span class="n">state</span><span class="o">.</span><span class="n">callstack</span>
+</pre></div>
+</div>
+<p>Get a basic block</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">block</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">block</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+<span class="n">block</span><span class="o">.</span><span class="n">capstone</span><span class="o">.</span><span class="n">pp</span><span class="p">()</span> <span class="c1"># Capstone object has pretty print and other data about the disassembly</span>
+<span class="n">block</span><span class="o">.</span><span class="n">vex</span><span class="o">.</span><span class="n">pp</span><span class="p">()</span>      <span class="c1"># Print vex representation</span>
+</pre></div>
+</div>
+</section>
+<section id="state-manipulation">
+<h2>State manipulation<a class="headerlink" href="#state-manipulation" title="Link to this heading">¶</a></h2>
+<p>Write to state:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">aaaa</span> <span class="o">=</span> <span class="n">claripy</span><span class="o">.</span><span class="n">BVV</span><span class="p">(</span><span class="mh">0x41414141</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span> <span class="c1"># 32 = Bits</span>
+<span class="n">state</span><span class="o">.</span><span class="n">memory</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="mh">0x6021f2</span><span class="p">,</span> <span class="n">aaaa</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Read Pointer to Pointer from Frame:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">poi1</span> <span class="o">=</span> <span class="n">new_state</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">new_state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rbp</span><span class="p">)</span><span class="o">-</span><span class="mh">0x10</span>
+<span class="n">poi1</span> <span class="o">=</span> <span class="n">new_state</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="n">poi1</span><span class="p">]</span><span class="o">.</span><span class="n">long</span><span class="o">.</span><span class="n">concrete</span>
+<span class="n">poi1</span> <span class="o">+=</span> <span class="mh">0x8</span>
+<span class="n">ptr1</span> <span class="o">=</span> <span class="n">new_state</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="n">poi1</span><span class="p">]</span><span class="o">.</span><span class="n">long</span><span class="o">.</span><span class="n">concrete</span>
+</pre></div>
+</div>
+<p>Read from State:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">key</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">38</span><span class="p">):</span>
+    <span class="n">key</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">extractkey</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="mh">0x602140</span> <span class="o">+</span> <span class="n">i</span><span class="o">*</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">int</span><span class="o">.</span><span class="n">concrete</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Alternatively, the below expression is equivalent</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">key</span> <span class="o">=</span> <span class="n">extractkey</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="mh">0x602140</span><span class="p">]</span><span class="o">.</span><span class="n">int</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">38</span><span class="p">)</span><span class="o">.</span><span class="n">concrete</span>
+</pre></div>
+</div>
+</section>
+<section id="debugging-bisa">
+<h2>Debugging bisa<a class="headerlink" href="#debugging-bisa" title="Link to this heading">¶</a></h2>
+<p>Set Breakpoint at every Memory read/write:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">new_state</span><span class="o">.</span><span class="n">inspect</span><span class="o">.</span><span class="n">b</span><span class="p">(</span><span class="s1">&#39;mem_read&#39;</span><span class="p">,</span> <span class="n">when</span><span class="o">=</span><span class="n">bisa</span><span class="o">.</span><span class="n">BP_AFTER</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="n">debug_funcRead</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">debug_funcRead</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
+    <span class="nb">print</span> <span class="s1">&#39;Read&#39;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">inspect</span><span class="o">.</span><span class="n">mem_read_expr</span><span class="p">,</span> <span class="s1">&#39;from&#39;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">inspect</span><span class="o">.</span><span class="n">mem_read_address</span>
+</pre></div>
+</div>
+<p>Set Breakpoint at specific Memory location:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">new_state</span><span class="o">.</span><span class="n">inspect</span><span class="o">.</span><span class="n">b</span><span class="p">(</span><span class="s1">&#39;mem_write&#39;</span><span class="p">,</span> <span class="n">mem_write_address</span><span class="o">=</span><span class="mh">0x6021f1</span><span class="p">,</span> <span class="n">when</span><span class="o">=</span><span class="n">bisa</span><span class="o">.</span><span class="n">BP_AFTER</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="n">debug_funcWrite</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">bisa</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core-concepts/index.html">Core Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyses/index.html">Build-in Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced-topics/index.html">Advanced Topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-bisa/index.html">Extending bisa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">bisa examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Appendix</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Cheatsheet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ops.html">List of Claripy Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="options.html">List of State Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="more-examples.html">CTF Challenge Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migration-9.1.html">Migrating to bisa 9.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migration-8.html">Migrating to bisa 8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migration-7.html">Migrating to bisa 7</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Appendix</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Appendix</a></li>
+      <li>Next: <a href="ops.html" title="next chapter">List of Claripy Operations</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, The bisa Project contributors.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/appendix/cheatsheet.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

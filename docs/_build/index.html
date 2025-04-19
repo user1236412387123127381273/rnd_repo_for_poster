@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Welcome to bisa’s documentation! &#8212; bisa  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Introduction" href="quickstart.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="welcome-to-bisa-s-documentation">
+<h1>Welcome to bisa’s documentation!<a class="headerlink" href="#welcome-to-bisa-s-documentation" title="Link to this heading">¶</a></h1>
+<p>Welcome to bisa’s documentation! This documentation is intended to be a guide
+for learning bisa, as well as a reference for the API. If you’re new to bisa,</p>
+<p>The bisa team maintains a number of libraries that are used as part of bisa.
+These libraries are:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://api.bisa.io/projects/archinfo/en/latest/">archinfo</a> - Information about CPU architectures</p></li>
+<li><p><a class="reference external" href="https://api.bisa.io/projects/pyvex/en/latest/">pyvex</a> - Python bindings to the VEX IR</p></li>
+<li><p><a class="reference external" href="https://api.bisa.io/projects/pypcode/en/latest/">pypcode</a> - Python bindings to the Pcode IR</p></li>
+<li><p><a class="reference external" href="https://api.bisa.io/projects/ailment/en/latest/">ailment</a> - bisa’s high-level intermediate language</p></li>
+<li><p><a class="reference external" href="https://api.bisa.io/projects/cle/en/latest/">cle</a> - Many-platform binary loader</p></li>
+<li><p><a class="reference external" href="https://api.bisa.io/projects/claripy/en/latest/">claripy</a> - Solver abstraction layer</p></li>
+</ul>
+<p>bisa also has a GUI! Check out <a class="reference external" href="https://github.com/bisa/bisa-management/">bisa-management</a>.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#getting-support">Getting Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#citing-bisa">Citing bisa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#going-further">Going further</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started/index.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting-started/installing.html">Installing bisa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started/developing.html">Reporting Bugs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started/developing.html#developing-bisa">Developing bisa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started/helpwanted.html">Help Wanted</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="core-concepts/index.html">Core Concepts</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="core-concepts/toplevel.html">Core Concepts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="core-concepts/loading.html">Loading a Binary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="core-concepts/solver.html">Symbolic Expressions and Constraint Solving</a></li>
+<li class="toctree-l2"><a class="reference internal" href="core-concepts/states.html">Machine State - memory, registers, and so on</a></li>
+<li class="toctree-l2"><a class="reference internal" href="core-concepts/pathgroups.html">Simulation Managers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="core-concepts/simulation.html">Simulation  and Instrumentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="core-concepts/analyses.html">Analyses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="core-concepts/symbolic.html">Symbolic Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="core-concepts/be_creative.html">A final word of advice</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="analyses/index.html">Build-in Analyses</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="analyses/cfg.html">Control-flow Graph Recovery (CFG)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analyses/backward_slice.html">Backward Slicing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analyses/identifier.html">Identifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analyses/decompiler.html">bisa Decompiler</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-topics/index.html">Advanced Topics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics/gotchas.html">Gotchas when using bisa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics/pipeline.html">Understanding the Execution Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics/mixins.html">What’s Up With Mixins, Anyway?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics/speed.html">Optimization considerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics/file_system.html">Working with File System, Sockets, and Pipes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics/ir.html">Intermediate Representation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics/structured_data.html">Working with Data and Conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics/claripy.html">Solver Engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics/concretization_strategies.html">Symbolic memory addressing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics/java_support.html">Java Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics/symbion.html">Symbion: Interleaving symbolic and concrete execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics/debug_var.html">Debug variable resolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics/debug_var.html#variable-visibility">Variable visibility</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="extending-bisa/index.html">Extending bisa</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="extending-bisa/simprocedures.html">Hooks and SimProcedures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending-bisa/state_plugins.html">State Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending-bisa/environment.html">Extending the Environment Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending-bisa/analysis_writing.html">Writing Analyses</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">bisa examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#reversing">Reversing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#vulnerability-discovery">Vulnerability Discovery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#exploitation">Exploitation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#why-is-it-named-bisa">Why is it named bisa?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-should-bisa-be-stylized">How should “bisa” be stylized?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#why-isn-t-symbolic-execution-doing-the-thing-i-want">Why isn’t symbolic execution doing the thing I want?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-can-i-get-diagnostic-information-about-what-bisa-is-doing">How can I get diagnostic information about what bisa is doing?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#why-is-bisa-so-slow">Why is bisa so slow?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-find-bugs-using-bisa">How do I find bugs using bisa?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#why-did-you-choose-vex-instead-of-another-ir-such-as-llvm-reil-bap-etc">Why did you choose VEX instead of another IR (such as LLVM, REIL, BAP, etc)?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#why-are-some-arm-addresses-off-by-one">Why are some ARM addresses off-by-one?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-serialize-bisa-objects">How do I serialize bisa objects?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#what-does-unsupportediroperror-floating-point-support-disabled-mean">What does <code class="docutils literal notranslate"><span class="pre">UnsupportedIROpError(&quot;floating</span> <span class="pre">point</span> <span class="pre">support</span> <span class="pre">disabled&quot;)</span></code> mean?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#why-is-bisa-s-cfg-different-from-ida-s">Why is bisa’s CFG different from IDA’s?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#why-do-i-get-incorrect-register-values-when-reading-from-a-state-during-a-siminspect-breakpoint">Why do I get incorrect register values when reading from a state during a SimInspect breakpoint?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="appendix/index.html">Appendix</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="appendix/cheatsheet.html">Cheatsheet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/ops.html">List of Claripy Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/options.html">List of State Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/more-examples.html">CTF Challenge Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/changelog.html">Changelog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/migration-9.1.html">Migrating to bisa 9.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/migration-8.html">Migrating to bisa 8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/migration-7.html">Migrating to bisa 7</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BP"><code class="docutils literal notranslate"><span class="pre">BP</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.Analysis"><code class="docutils literal notranslate"><span class="pre">Analysis</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISAAnalysisError"><code class="docutils literal notranslate"><span class="pre">BISAAnalysisError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISAAnnotatedCFGError"><code class="docutils literal notranslate"><span class="pre">BISAAnnotatedCFGError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISAAssemblyError"><code class="docutils literal notranslate"><span class="pre">BISAAssemblyError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISABackwardSlicingError"><code class="docutils literal notranslate"><span class="pre">BISABackwardSlicingError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISABladeError"><code class="docutils literal notranslate"><span class="pre">BISABladeError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISABladeSimProcError"><code class="docutils literal notranslate"><span class="pre">BISABladeSimProcError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISACFGError"><code class="docutils literal notranslate"><span class="pre">BISACFGError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISACallableError"><code class="docutils literal notranslate"><span class="pre">BISACallableError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISACallableMultistateError"><code class="docutils literal notranslate"><span class="pre">BISACallableMultistateError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISACorruptDBError"><code class="docutils literal notranslate"><span class="pre">BISACorruptDBError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISADBError"><code class="docutils literal notranslate"><span class="pre">BISADBError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISADDGError"><code class="docutils literal notranslate"><span class="pre">BISADDGError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISADataGraphError"><code class="docutils literal notranslate"><span class="pre">BISADataGraphError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISADecompilationError"><code class="docutils literal notranslate"><span class="pre">BISADecompilationError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISADelayJobNotice"><code class="docutils literal notranslate"><span class="pre">BISADelayJobNotice</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISADirectorError"><code class="docutils literal notranslate"><span class="pre">BISADirectorError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISAError"><code class="docutils literal notranslate"><span class="pre">BISAError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISAExitError"><code class="docutils literal notranslate"><span class="pre">BISAExitError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISAExplorationTechniqueError"><code class="docutils literal notranslate"><span class="pre">BISAExplorationTechniqueError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISAExplorerError"><code class="docutils literal notranslate"><span class="pre">BISAExplorerError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISAForwardAnalysisError"><code class="docutils literal notranslate"><span class="pre">BISAForwardAnalysisError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISAIncompatibleDBError"><code class="docutils literal notranslate"><span class="pre">BISAIncompatibleDBError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISAIncongruencyError"><code class="docutils literal notranslate"><span class="pre">BISAIncongruencyError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISAInvalidArgumentError"><code class="docutils literal notranslate"><span class="pre">BISAInvalidArgumentError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISAJobMergingFailureNotice"><code class="docutils literal notranslate"><span class="pre">BISAJobMergingFailureNotice</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISAJobWideningFailureNotice"><code class="docutils literal notranslate"><span class="pre">BISAJobWideningFailureNotice</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISALifterError"><code class="docutils literal notranslate"><span class="pre">BISALifterError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISALoopAnalysisError"><code class="docutils literal notranslate"><span class="pre">BISALoopAnalysisError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISAMissingTypeError"><code class="docutils literal notranslate"><span class="pre">BISAMissingTypeError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISANoPluginError"><code class="docutils literal notranslate"><span class="pre">BISANoPluginError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISAPathError"><code class="docutils literal notranslate"><span class="pre">BISAPathError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISARuntimeError"><code class="docutils literal notranslate"><span class="pre">BISARuntimeError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISASimOSError"><code class="docutils literal notranslate"><span class="pre">BISASimOSError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISASkipJobNotice"><code class="docutils literal notranslate"><span class="pre">BISASkipJobNotice</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISASurveyorError"><code class="docutils literal notranslate"><span class="pre">BISASurveyorError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISASyscallError"><code class="docutils literal notranslate"><span class="pre">BISASyscallError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISATracerError"><code class="docutils literal notranslate"><span class="pre">BISATracerError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISATypeError"><code class="docutils literal notranslate"><span class="pre">BISATypeError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISAUnsupportedSyscallError"><code class="docutils literal notranslate"><span class="pre">BISAUnsupportedSyscallError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISAVFGError"><code class="docutils literal notranslate"><span class="pre">BISAVFGError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISAVFGRestartAnalysisNotice"><code class="docutils literal notranslate"><span class="pre">BISAVFGRestartAnalysisNotice</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISAValueError"><code class="docutils literal notranslate"><span class="pre">BISAValueError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.BISAVaultError"><code class="docutils literal notranslate"><span class="pre">BISAVaultError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.Blade"><code class="docutils literal notranslate"><span class="pre">Blade</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.Block"><code class="docutils literal notranslate"><span class="pre">Block</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.ExplorationTechnique"><code class="docutils literal notranslate"><span class="pre">ExplorationTechnique</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.KnowledgeBase"><code class="docutils literal notranslate"><span class="pre">KnowledgeBase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.PTChunk"><code class="docutils literal notranslate"><span class="pre">PTChunk</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.PathUnreachableError"><code class="docutils literal notranslate"><span class="pre">PathUnreachableError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.PointerWrapper"><code class="docutils literal notranslate"><span class="pre">PointerWrapper</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.Project"><code class="docutils literal notranslate"><span class="pre">Project</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.Server"><code class="docutils literal notranslate"><span class="pre">Server</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimAbstractMemoryError"><code class="docutils literal notranslate"><span class="pre">SimAbstractMemoryError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimActionError"><code class="docutils literal notranslate"><span class="pre">SimActionError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimCC"><code class="docutils literal notranslate"><span class="pre">SimCC</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimCCError"><code class="docutils literal notranslate"><span class="pre">SimCCError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimCCallError"><code class="docutils literal notranslate"><span class="pre">SimCCallError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimConcreteBreakpointError"><code class="docutils literal notranslate"><span class="pre">SimConcreteBreakpointError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimConcreteMemoryError"><code class="docutils literal notranslate"><span class="pre">SimConcreteMemoryError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimConcreteRegisterError"><code class="docutils literal notranslate"><span class="pre">SimConcreteRegisterError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimEmptyCallStackError"><code class="docutils literal notranslate"><span class="pre">SimEmptyCallStackError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimEngineError"><code class="docutils literal notranslate"><span class="pre">SimEngineError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimError"><code class="docutils literal notranslate"><span class="pre">SimError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimEventError"><code class="docutils literal notranslate"><span class="pre">SimEventError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimException"><code class="docutils literal notranslate"><span class="pre">SimException</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimExpressionError"><code class="docutils literal notranslate"><span class="pre">SimExpressionError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimFastMemoryError"><code class="docutils literal notranslate"><span class="pre">SimFastMemoryError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimFastPathError"><code class="docutils literal notranslate"><span class="pre">SimFastPathError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimFile"><code class="docutils literal notranslate"><span class="pre">SimFile</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimFileBase"><code class="docutils literal notranslate"><span class="pre">SimFileBase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimFileDescriptor"><code class="docutils literal notranslate"><span class="pre">SimFileDescriptor</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimFileDescriptorDuplex"><code class="docutils literal notranslate"><span class="pre">SimFileDescriptorDuplex</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimFileError"><code class="docutils literal notranslate"><span class="pre">SimFileError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimFileStream"><code class="docutils literal notranslate"><span class="pre">SimFileStream</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimFilesystemError"><code class="docutils literal notranslate"><span class="pre">SimFilesystemError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimHeapBrk"><code class="docutils literal notranslate"><span class="pre">SimHeapBrk</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimHeapError"><code class="docutils literal notranslate"><span class="pre">SimHeapError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimHeapPTMalloc"><code class="docutils literal notranslate"><span class="pre">SimHeapPTMalloc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimHostFilesystem"><code class="docutils literal notranslate"><span class="pre">SimHostFilesystem</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimIRSBError"><code class="docutils literal notranslate"><span class="pre">SimIRSBError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimIRSBNoDecodeError"><code class="docutils literal notranslate"><span class="pre">SimIRSBNoDecodeError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimMemoryAddressError"><code class="docutils literal notranslate"><span class="pre">SimMemoryAddressError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimMemoryError"><code class="docutils literal notranslate"><span class="pre">SimMemoryError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimMemoryLimitError"><code class="docutils literal notranslate"><span class="pre">SimMemoryLimitError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimMemoryMissingError"><code class="docutils literal notranslate"><span class="pre">SimMemoryMissingError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimMergeError"><code class="docutils literal notranslate"><span class="pre">SimMergeError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimMissingTempError"><code class="docutils literal notranslate"><span class="pre">SimMissingTempError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimMount"><code class="docutils literal notranslate"><span class="pre">SimMount</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimOS"><code class="docutils literal notranslate"><span class="pre">SimOS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimOperationError"><code class="docutils literal notranslate"><span class="pre">SimOperationError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimPackets"><code class="docutils literal notranslate"><span class="pre">SimPackets</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimPacketsStream"><code class="docutils literal notranslate"><span class="pre">SimPacketsStream</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimPosixError"><code class="docutils literal notranslate"><span class="pre">SimPosixError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimProcedure"><code class="docutils literal notranslate"><span class="pre">SimProcedure</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimProcedureArgumentError"><code class="docutils literal notranslate"><span class="pre">SimProcedureArgumentError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimProcedureError"><code class="docutils literal notranslate"><span class="pre">SimProcedureError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimRegionMapError"><code class="docutils literal notranslate"><span class="pre">SimRegionMapError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimReliftException"><code class="docutils literal notranslate"><span class="pre">SimReliftException</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimSegfaultError"><code class="docutils literal notranslate"><span class="pre">SimSegfaultError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimSegfaultException"><code class="docutils literal notranslate"><span class="pre">SimSegfaultException</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimShadowStackError"><code class="docutils literal notranslate"><span class="pre">SimShadowStackError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimSlicerError"><code class="docutils literal notranslate"><span class="pre">SimSlicerError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimSolverError"><code class="docutils literal notranslate"><span class="pre">SimSolverError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimSolverModeError"><code class="docutils literal notranslate"><span class="pre">SimSolverModeError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimSolverOptionError"><code class="docutils literal notranslate"><span class="pre">SimSolverOptionError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimState"><code class="docutils literal notranslate"><span class="pre">SimState</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimStateError"><code class="docutils literal notranslate"><span class="pre">SimStateError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimStateOptionsError"><code class="docutils literal notranslate"><span class="pre">SimStateOptionsError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimStatePlugin"><code class="docutils literal notranslate"><span class="pre">SimStatePlugin</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimStatementError"><code class="docutils literal notranslate"><span class="pre">SimStatementError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimSymbolicFilesystemError"><code class="docutils literal notranslate"><span class="pre">SimSymbolicFilesystemError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimTranslationError"><code class="docutils literal notranslate"><span class="pre">SimTranslationError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimUCManagerAllocationError"><code class="docutils literal notranslate"><span class="pre">SimUCManagerAllocationError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimUCManagerError"><code class="docutils literal notranslate"><span class="pre">SimUCManagerError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimUnicornError"><code class="docutils literal notranslate"><span class="pre">SimUnicornError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimUnicornSymbolic"><code class="docutils literal notranslate"><span class="pre">SimUnicornSymbolic</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimUnicornUnsupport"><code class="docutils literal notranslate"><span class="pre">SimUnicornUnsupport</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimUninitializedAccessError"><code class="docutils literal notranslate"><span class="pre">SimUninitializedAccessError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimUnsatError"><code class="docutils literal notranslate"><span class="pre">SimUnsatError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimUnsupportedError"><code class="docutils literal notranslate"><span class="pre">SimUnsupportedError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimValueError"><code class="docutils literal notranslate"><span class="pre">SimValueError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimZeroDivisionException"><code class="docutils literal notranslate"><span class="pre">SimZeroDivisionException</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimulationManager"><code class="docutils literal notranslate"><span class="pre">SimulationManager</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.SimulationManagerError"><code class="docutils literal notranslate"><span class="pre">SimulationManagerError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.StateHierarchy"><code class="docutils literal notranslate"><span class="pre">StateHierarchy</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.TracerEnvironmentError"><code class="docutils literal notranslate"><span class="pre">TracerEnvironmentError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.UnsupportedCCallError"><code class="docutils literal notranslate"><span class="pre">UnsupportedCCallError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.UnsupportedDirtyError"><code class="docutils literal notranslate"><span class="pre">UnsupportedDirtyError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.UnsupportedIRExprError"><code class="docutils literal notranslate"><span class="pre">UnsupportedIRExprError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.UnsupportedIROpError"><code class="docutils literal notranslate"><span class="pre">UnsupportedIROpError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.UnsupportedIRStmtError"><code class="docutils literal notranslate"><span class="pre">UnsupportedIRStmtError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.UnsupportedNodeTypeError"><code class="docutils literal notranslate"><span class="pre">UnsupportedNodeTypeError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.UnsupportedSyscallError"><code class="docutils literal notranslate"><span class="pre">UnsupportedSyscallError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.default_cc"><code class="docutils literal notranslate"><span class="pre">default_cc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.load_shellcode"><code class="docutils literal notranslate"><span class="pre">load_shellcode()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#bisa.register_analysis"><code class="docutils literal notranslate"><span class="pre">register_analysis()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-bisa.project">Project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-bisa.misc.plugins">Plugin Ecosystem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-bisa.sim_state">Program State</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-bisa.storage">Storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-bisa.storage.memory_mixins">Memory Mixins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-bisa.concretization_strategies.single">Concretization Strategies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-bisa.sim_manager">Simulation Manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-bisa.exploration_techniques">Exploration Techniques</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-bisa.engines">Simulation Engines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-bisa.state_plugins.sim_action">Simulation Logging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-bisa.sim_procedure">Procedures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-bisa.calling_conventions">Calling Conventions and Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-bisa.knowledge_base">Knowledge Base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-bisa.serializable">Serialization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-bisa.analyses">Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-bisa.simos">SimOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-bisa.flirt">Function Signature Matching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-bisa.utils">Utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-bisa.errors">Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-bisa.distributed">Distributed analysis</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">bisa</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core-concepts/index.html">Core Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyses/index.html">Build-in Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-topics/index.html">Advanced Topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-bisa/index.html">Extending bisa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">bisa examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix/index.html">Appendix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="quickstart.html" title="next chapter">Introduction</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, The bisa Project contributors.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

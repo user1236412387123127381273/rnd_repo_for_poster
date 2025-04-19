@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Reporting Bugs &#8212; bisa  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Help Wanted" href="helpwanted.html" />
+    <link rel="prev" title="Installing bisa" href="installing.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="reporting-bugs">
+<h1>Reporting Bugs<a class="headerlink" href="#reporting-bugs" title="Link to this heading">¶</a></h1>
+<p>If you’ve found something that bisa isn’t able to solve and appears to be a bug,
+please let us know!</p>
+<ol class="arabic simple">
+<li><p>Create a fork off of bisa/binaries and bisa/bisa</p></li>
+<li><p>Give us a pull request with bisa/binaries, with the binaries in question</p></li>
+<li><p>Give us a pull request for bisa/bisa, with testcases that trigger the
+binaries in <code class="docutils literal notranslate"><span class="pre">bisa/tests/broken_x.py</span></code>, <code class="docutils literal notranslate"><span class="pre">bisa/tests/broken_y.py</span></code>, etc</p></li>
+</ol>
+<p>Please try to follow the testcase format that we have (so the code is in a
+test_blah function), that way we can very easily merge that and make the scripts
+run.</p>
+<p>An example is:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_some_broken_feature</span><span class="p">():</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">bisa</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="s2">&quot;some_binary&quot;</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">analyses</span><span class="o">.</span><span class="n">SomethingThatDoesNotWork</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="s2">&quot;what it should *actually* be if it worked&quot;</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">test_some_broken_feature</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This will <em>greatly</em> help us recreate your bug and fix it faster.</p>
+<p>The ideal situation is that, when the bug is fixed, your testcases passes (i.e.,
+the assert at the end does not raise an AssertionError).</p>
+<p>Then, we can just fix the bug and rename <code class="docutils literal notranslate"><span class="pre">broken_x.py</span></code> to <code class="docutils literal notranslate"><span class="pre">test_x.py</span></code> and
+the testcase will run in our internal CI at every push, ensuring that we do not
+break this feature again.</p>
+</section>
+<section id="developing-bisa">
+<h1>Developing bisa<a class="headerlink" href="#developing-bisa" title="Link to this heading">¶</a></h1>
+<p>These are some guidelines so that we can keep the codebase in good shape!</p>
+<section id="pre-commit">
+<h2>pre-commit<a class="headerlink" href="#pre-commit" title="Link to this heading">¶</a></h2>
+<p>Many bisa repos contain pre-commit hooks provided by <a class="reference external" href="https://pre-commit.com/">pre-commit</a>. Installing this is as easy as <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span>
+<span class="pre">pre-commit</span></code>. After <code class="docutils literal notranslate"><span class="pre">git</span></code> cloning an bisa repository, if the repo contains a
+<code class="docutils literal notranslate"><span class="pre">.pre-commit-config.yaml</span></code>, run <code class="docutils literal notranslate"><span class="pre">pre-commit</span> <span class="pre">install</span></code>. Future <code class="docutils literal notranslate"><span class="pre">git</span></code>
+commits will now invoke these hooks automatically.</p>
+</section>
+<section id="coding-style">
+<h2>Coding style<a class="headerlink" href="#coding-style" title="Link to this heading">¶</a></h2>
+<p>We format our code with <a class="reference external" href="https://github.com/psf/black">black</a> and otherwise
+try to get as close as the <a class="reference external" href="http://legacy.python.org/dev/peps/pep-0008/">PEP8 code convention</a> as is reasonable without being
+dumb. If you use Vim, the <a class="reference external" href="https://github.com/klen/python-mode">python-mode</a>
+plugin does all you need. You can also <a class="reference external" href="https://wiki.python.org/moin/Vim">manually configure</a> vim to adopt this behavior.</p>
+<p>Most importantly, please consider the following when writing code as part of bisa:</p>
+<ul class="simple">
+<li><p>Try to use attribute access (see the <code class="docutils literal notranslate"><span class="pre">&#64;property</span></code> decorator) instead of
+getters and setters wherever you can. This isn’t Java, and attributes enable
+tab completion in iPython. That being said, be reasonable: attributes should
+be fast. A rule of thumb is that if something could require a constraint
+solve, it should not be an attribute.</p></li>
+<li><p>Use <a class="reference external" href="https://github.com/bisa/bisa-dev/blob/master/pylintrc">our pylintrc from the bisa-dev repo</a>. It’s fairly
+permissive, but our CI server will fail your builds if pylint complains under
+those settings.</p></li>
+<li><p>DO NOT, under ANY circumstances, <code class="docutils literal notranslate"><span class="pre">raise</span> <span class="pre">Exception</span></code> or <code class="docutils literal notranslate"><span class="pre">assert</span> <span class="pre">False</span></code>.
+<strong>Use the right exception type</strong>. If there isn’t a correct exception type,
+subclass the core exception of the module that you’re working in (i.e.,
+<code class="docutils literal notranslate"><span class="pre">BISAError</span></code> in bisa, <code class="docutils literal notranslate"><span class="pre">SimError</span></code> in SimuVEX, etc) and raise that. We catch,
+and properly handle, the right types of errors in the right places, but
+<code class="docutils literal notranslate"><span class="pre">AssertionError</span></code> and <code class="docutils literal notranslate"><span class="pre">Exception</span></code> are not handled anywhere and
+force-terminate analyses.</p></li>
+<li><p>Avoid tabs; use space indentation instead. Even though it’s wrong, the de
+facto standard is 4 spaces. It is a good idea to adopt this from the
+beginning, as merging code that mixes both tab and space indentation is awful.</p></li>
+<li><p>Avoid super long lines. It’s okay to have longer lines, but keep in mind that
+long lines are harder to read and should be avoided. Let’s try to stick to
+<strong>120 characters</strong>.</p></li>
+<li><p>Avoid extremely long functions, it is often better to break them up into
+smaller functions.</p></li>
+<li><p>Always use <code class="docutils literal notranslate"><span class="pre">_</span></code> instead of <code class="docutils literal notranslate"><span class="pre">__</span></code> for private members (so that we can access
+them when debugging). <em>You</em> might not think that anyone has a need to call a
+given function, but trust us, you’re wrong.</p></li>
+<li><p>Format your code with <code class="docutils literal notranslate"><span class="pre">black</span></code>; config is already defined within
+<code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>.</p></li>
+</ul>
+</section>
+<section id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Link to this heading">¶</a></h2>
+<p>Document your code. Every <em>class definition</em> and <em>public function definition</em>
+should have some description of:</p>
+<ul class="simple">
+<li><p>What it does.</p></li>
+<li><p>What are the type and the meaning of the parameters.</p></li>
+<li><p>What it returns.</p></li>
+</ul>
+<p>Class docstrings will be enforced by our linter. Do <em>not</em> under any
+circumstances write a docstring which doesn’t provide more information than the
+name of the class. What you should try to write is a description of the
+environment that the class should be used in. If the class should not be
+instantiated by end-users, write a description of where it will be generated and
+how instances can be acquired. If the class should be instantiated by end-users,
+explain what kind of object it represents at its core, what behavior is expected
+of its parameters, and how to safely manage objects of its type.</p>
+<p>We use <a class="reference external" href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> to generate the API
+documentation. Sphinx supports docstrings written in <a class="reference external" href="http://openalea.gforge.inria.fr/doc/openalea/doc/_build/html/source/sphinx/rest_syntax.html#auto-document-your-python-code">ReStructured Text</a>
+with special <a class="reference external" href="http://www.sphinx-doc.org/en/stable/domains.html#info-field-lists">keywords</a> to
+document function and class parameters, return values, return types, members,
+etc.</p>
+<p>Here is an example of function documentation. Ideally the parameter descriptions
+should be aligned vertically to make the docstrings as readable as possible.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">prune</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">from_stash</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">to_stash</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prune unsatisfiable paths from a stash.</span>
+
+<span class="sd">    :param filter_func: Only prune paths that match this filter.</span>
+<span class="sd">    :param from_stash:  Prune paths from this stash. (default: &#39;active&#39;)</span>
+<span class="sd">    :param to_stash:    Put pruned paths in this stash. (default: &#39;pruned&#39;)</span>
+<span class="sd">    :returns:           The resulting PathGroup.</span>
+<span class="sd">    :rtype:             PathGroup</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>This format has the advantage that the function parameters are clearly
+identified in the generated documentation. However, it can make the
+documentation repetitive, in some cases a textual description can be more
+readable. Pick the format you feel is more appropriate for the functions or
+classes you are documenting.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">read_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+<span class="w">   </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">   Read `n` bytes at address `addr` in memory and return an array of bytes.</span>
+<span class="sd">   &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="unit-tests">
+<h2>Unit tests<a class="headerlink" href="#unit-tests" title="Link to this heading">¶</a></h2>
+<p>If you’re pushing a new feature and it is not accompanied by a test case it
+<strong>will be broken</strong> in very short order. Please write test cases for your stuff.</p>
+<p>We have an internal CI server to run tests to check functionality and regression
+on each commit. In order to have our server run your tests, write your tests in
+a format acceptable to <a class="reference external" href="https://nose.readthedocs.org/en/latest/">nosetests</a> in
+a file matching <code class="docutils literal notranslate"><span class="pre">test_*.py</span></code> in the <code class="docutils literal notranslate"><span class="pre">tests</span></code> folder of the appropriate
+repository. A test file can contain any number of functions of the form <code class="docutils literal notranslate"><span class="pre">def</span>
+<span class="pre">test_*():</span></code> or classes of the form <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">Test*(unittest.TestCase):</span></code>. Each of
+them will be run as a test, and if they raise any exceptions or assertions, the
+test fails. Do not use the <code class="docutils literal notranslate"><span class="pre">nose.tools.assert_*</span></code> functions, as we are
+presently trying to migrate to <code class="docutils literal notranslate"><span class="pre">nose2</span></code>. Use <code class="docutils literal notranslate"><span class="pre">assert</span></code> statements with
+descriptive messages or the <code class="docutils literal notranslate"><span class="pre">unittest.TestCase</span></code> assert methods.</p>
+<p>Look at the existing tests for examples. Many of them use an alternate format
+where the <code class="docutils literal notranslate"><span class="pre">test_*</span></code> function is actually a generator that yields tuples of
+functions to call and their arguments, for easy parametrization of tests.</p>
+<p>Finally, do not add docstrings to your test functions.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">bisa</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Getting Started</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="installing.html">Installing bisa</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Reporting Bugs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#developing-bisa">Developing bisa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="helpwanted.html">Help Wanted</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../core-concepts/index.html">Core Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyses/index.html">Build-in Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced-topics/index.html">Advanced Topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-bisa/index.html">Extending bisa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">bisa examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/index.html">Appendix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Getting Started</a><ul>
+      <li>Previous: <a href="installing.html" title="previous chapter">Installing bisa</a></li>
+      <li>Next: <a href="helpwanted.html" title="next chapter">Help Wanted</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, The bisa Project contributors.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/getting-started/developing.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

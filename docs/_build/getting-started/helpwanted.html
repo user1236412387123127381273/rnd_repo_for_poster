@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Help Wanted &#8212; bisa  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Core Concepts" href="../core-concepts/index.html" />
+    <link rel="prev" title="Reporting Bugs" href="developing.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="help-wanted">
+<h1>Help Wanted<a class="headerlink" href="#help-wanted" title="Link to this heading">¶</a></h1>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>This page is woefully out of date. We need to update it.</p>
+</div>
+<p>bisa is a huge project, and it’s hard to keep up. Here, we list some big TODO
+items that we would love community contributions for in the hope that it can
+direct community involvement. They (will) have a wide range of complexity, and
+there should be something for all skill levels!</p>
+<p>We tag issues on our github repositories that would be good for community
+involvement as “Help wanted”. To see the exhaustive list of these, use <a class="reference external" href="https://github.com/search?utf8=%E2%9C%93&amp;q=user%3Abisa+label%3A%22help+wanted%22+state%3Aopen&amp;type=Issues&amp;ref=advsearch&amp;l=&amp;l=">this
+github search!</a></p>
+<section id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Link to this heading">¶</a></h2>
+<p>There are many parts of bisa that suffer from little or no documentation. We
+desperately need community help in this area.</p>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<p>We are always behind on documentation. We’ve created several tracking issues on
+github to understand what’s still missing:</p>
+<ol class="arabic simple">
+<li><p><a class="reference external" href="https://github.com/bisa/bisa/issues/145">bisa</a></p></li>
+<li><p><a class="reference external" href="https://github.com/bisa/claripy/issues/17">claripy</a></p></li>
+<li><p><a class="reference external" href="https://github.com/bisa/cle/issues/29">cle</a></p></li>
+<li><p><a class="reference external" href="https://github.com/bisa/pyvex/issues/34">pyvex</a></p></li>
+</ol>
+</section>
+<section id="gitbook">
+<h3>GitBook<a class="headerlink" href="#gitbook" title="Link to this heading">¶</a></h3>
+<p>This book is missing some core areas. Specifically, the following could be
+improved:</p>
+<ol class="arabic simple">
+<li><p>Finish some of the TODOs floating around the book.</p></li>
+<li><p>Organize the Examples page in some way that makes sense. Right now, most of
+the examples are very redundant. It might be cool to have a simple table of
+most of them so that the page is not so overwhelming.</p></li>
+</ol>
+</section>
+<section id="bisa-course">
+<h3>bisa course<a class="headerlink" href="#bisa-course" title="Link to this heading">¶</a></h3>
+<p>Developing a “course” of sorts to get people started with bisa would be really
+beneficial. Steps have already been made in this direction <a class="reference external" href="https://github.com/bisa/bisa-doc/pull/74">here</a>, but more expansion would be
+beneficial.</p>
+<p>Ideally, the course would have a hands-on component, of increasing difficulty,
+that would require people to use more and more of bisa’s capabilities.</p>
+</section>
+</section>
+<section id="research-re-implementation">
+<h2>Research re-implementation<a class="headerlink" href="#research-re-implementation" title="Link to this heading">¶</a></h2>
+<p>Unfortunately, not everyone bases their research on bisa ;-). Until that’s
+remedied, we’ll need to periodically implement related work, on top of bisa, to
+make it reusable within the scope of the framework. This section lists some of
+this related work that’s ripe for reimplementation in bisa.</p>
+<section id="redundant-state-detection-for-dynamic-symbolic-execution">
+<h3>Redundant State Detection for Dynamic Symbolic Execution<a class="headerlink" href="#redundant-state-detection-for-dynamic-symbolic-execution" title="Link to this heading">¶</a></h3>
+<p>Bugrara, et al. describe a method to identify and trim redundant states,
+increasing the speed of symbolic execution by up to 50 times and coverage by 4%.
+This would be great to have in bisa, as an ExplorationTechnique. The paper is
+here: <a class="reference external" href="http://nsl.cs.columbia.edu/projects/minestrone/papers/atc13-bugrara.pdf">http://nsl.cs.columbia.edu/projects/minestrone/papers/atc13-bugrara.pdf</a></p>
+</section>
+<section id="in-vivo-multi-path-analysis-of-software-systems">
+<h3>In-Vivo Multi-Path Analysis of Software Systems<a class="headerlink" href="#in-vivo-multi-path-analysis-of-software-systems" title="Link to this heading">¶</a></h3>
+<p>Rather than developing symbolic summaries for every system call, we can use a
+technique proposed by <a class="reference external" href="http://dslab.epfl.ch/pubs/s2e.pdf">S2E</a> for
+concretizing necessary data and dispatching them to the OS itself. This would
+make bisa applicable to a <em>much</em> larger set of binaries than it can currently
+analyze.</p>
+<p>While this would be most useful for system calls, once it is implemented, it
+could be trivially applied to any location of code (i.e., library functions). By
+carefully choosing which library functions are handled like this, we can greatly
+increase bisa’s scalability.</p>
+</section>
+</section>
+<section id="development">
+<h2>Development<a class="headerlink" href="#development" title="Link to this heading">¶</a></h2>
+<p>We have several projects in mind that primarily require development effort.</p>
+<section id="bisa-management">
+<h3>bisa-management<a class="headerlink" href="#bisa-management" title="Link to this heading">¶</a></h3>
+<p>The bisa GUI, <a class="reference external" href="https://github.com/bisa/bisa-management">bisa-management</a>,
+could use your improvements! Exposing more of bisa’s capabilities in a usable
+way, graphically, would be really useful!</p>
+</section>
+<section id="ida-plugins">
+<h3>IDA Plugins<a class="headerlink" href="#ida-plugins" title="Link to this heading">¶</a></h3>
+<p>Much of bisa’s functionality could be exposed via IDA. For example, bisa’s data
+dependence graph could be exposed in IDA through annotations, or obfuscated
+values can be resolved using symbolic execution.</p>
+</section>
+<section id="additional-architectures">
+<h3>Additional architectures<a class="headerlink" href="#additional-architectures" title="Link to this heading">¶</a></h3>
+<p>More architecture support would make bisa all the more useful.
+Supporting a new architecture with bisa would involve:</p>
+<ol class="arabic simple">
+<li><p>Adding the architecture information to <a class="reference external" href="https://github.com/bisa/archinfo">archinfo</a></p></li>
+<li><p>Adding an IR translation. This may be either an extension to PyVEX, producing
+IRSBs, or another IR entirely.</p></li>
+<li><p>If your IR is not VEX, add a <code class="docutils literal notranslate"><span class="pre">SimEngine</span></code> to support it.</p></li>
+<li><p>Adding a calling convention (<code class="docutils literal notranslate"><span class="pre">bisa.SimCC</span></code>) to support SimProcedures
+(including system calls)</p></li>
+<li><p>Adding or modifying an <code class="docutils literal notranslate"><span class="pre">bisa.SimOS</span></code> to support initialization activities.</p></li>
+<li><p>Creating a CLE backend to load binaries, or extending the CLE ELF backend to
+know about the new architecture if the binary format is ELF.</p></li>
+</ol>
+<p><strong>ideas for new architectures:</strong></p>
+<ul class="simple">
+<li><p>PIC, AVR, other embedded architectures</p></li>
+<li><p>SPARC (there is some preliminary libVEX support for SPARC <a class="reference external" href="https://bitbucket.org/iraisr/valgrind-solaris">here</a>)</p></li>
+</ul>
+<p><strong>ideas for new IRs:</strong></p>
+<ul class="simple">
+<li><p>LLVM IR (with this, we can extend bisa from just a Binary Analysis Framework
+to a Program Analysis Framework and expand its capabilities in other ways!)</p></li>
+<li><p>SOOT (there is no reason that bisa can’t analyze Java code, although doing so
+would require some extensions to our memory model)</p></li>
+</ul>
+</section>
+<section id="environment-support">
+<h3>Environment support<a class="headerlink" href="#environment-support" title="Link to this heading">¶</a></h3>
+<p>We use the concept of “function summaries” in bisa to model the environment of
+operating systems (i.e., the effects of their system calls) and library
+functions. Extending this would be greatly helpful in increasing bisa’s utility.
+These function summaries can be found <a class="reference external" href="https://github.com/bisa/bisa/tree/master/bisa/procedures">here</a>.</p>
+<p>A specific subset of this is system calls. Even more than library function
+SimProcedures (without which bisa can always execute the actual function), we
+have very few workarounds for missing system calls. Every implemented system
+call extends the set of binaries that bisa can handle.</p>
+</section>
+</section>
+<section id="design-problems">
+<h2>Design Problems<a class="headerlink" href="#design-problems" title="Link to this heading">¶</a></h2>
+<p>There are some outstanding design challenges regarding the integration of
+additional functionalities into bisa.</p>
+<section id="type-annotation-and-type-information-usage">
+<h3>Type annotation and type information usage<a class="headerlink" href="#type-annotation-and-type-information-usage" title="Link to this heading">¶</a></h3>
+<p>bisa has fledgling support for types, in the sense that it can parse them out of
+header files. However, those types are not well exposed to do anything useful
+with. Improving this support would make it possible to, for example, annotate
+certain memory regions with certain type information and interact with them
+intelligently. Consider, for example, interacting with a linked list like this:
+<code class="docutils literal notranslate"><span class="pre">print</span> <span class="pre">state.mem[state.regs.rax].llist.next.next.value</span></code>.</p>
+<p>(editor’s note: you can actually already do this)</p>
+</section>
+</section>
+<section id="research-challenges">
+<h2>Research Challenges<a class="headerlink" href="#research-challenges" title="Link to this heading">¶</a></h2>
+<p>Historically, bisa has progressed in the course of research into novel areas of
+program analysis. Here, we list several self-contained research projects that
+can be tackled.</p>
+<section id="semantic-function-identification-diffing">
+<h3>Semantic function identification/diffing<a class="headerlink" href="#semantic-function-identification-diffing" title="Link to this heading">¶</a></h3>
+<p>Current function diffing techniques (TODO: some examples) have drawbacks. For
+the CGC, we created a semantic-based binary identification engine (
+<a class="reference external" href="https://github.com/bisa/identifier">https://github.com/bisa/identifier</a>)
+that can identify functions based on testcases. There are two areas of
+improvement, each of which is its own research project:</p>
+<ol class="arabic simple">
+<li><p>Currently, the testcases used by this component are human-generated. However,
+symbolic execution can be used to automatically generate testcases that can
+be used to recognize instances of a given function in other binaries.</p></li>
+<li><p>By creating testcases that achieve a “high-enough” code coverage of a given
+function, we can detect changes in functionality by applying the set of
+testcases to another implementation of the same function and analyzing
+changes in code coverage. This can then be used as a semantic function diff.</p></li>
+</ol>
+</section>
+<section id="applying-afl-s-path-selection-criteria-to-symbolic-execution">
+<h3>Applying AFL’s path selection criteria to symbolic execution<a class="headerlink" href="#applying-afl-s-path-selection-criteria-to-symbolic-execution" title="Link to this heading">¶</a></h3>
+<p>AFL does an excellent job in identifying “unique” paths during fuzzing by
+tracking the control flow transitions taken by every path. This same metric can
+be applied to symbolic exploration, and would probably do a depressingly good
+job, considering how simple it is.</p>
+</section>
+</section>
+<section id="overarching-research-directions">
+<h2>Overarching Research Directions<a class="headerlink" href="#overarching-research-directions" title="Link to this heading">¶</a></h2>
+<p>There are areas of program analysis that are not well explored. We list general
+directions of research here, but readers should keep in mind that these
+directions likely describe potential undertakings of entire PhD dissertations.</p>
+<section id="process-interactions">
+<h3>Process interactions<a class="headerlink" href="#process-interactions" title="Link to this heading">¶</a></h3>
+<p>Almost all work in the field of binary analysis deals with single binaries, but
+this is often unrealistic in the real world. For example, the type of input that
+can be passed to a CGI program depend on pre-processing by a web server.
+Currently, there is no way to support the analysis of multiple concurrent
+processes in bisa, and many open questions in the field (i.e., how to model
+concurrent actions).</p>
+</section>
+<section id="intra-process-concurrency">
+<h3>Intra-process concurrency<a class="headerlink" href="#intra-process-concurrency" title="Link to this heading">¶</a></h3>
+<p>Similar to the modeling of interactions between processes, little work has been
+done in understanding the interaction of concurrent threads in the same process.
+Currently, bisa has no way to reason about this, and it is unclear from the
+theoretical perspective how to approach this.</p>
+<p>A subset of this problem is the analysis of signal handlers (or hardware
+interrupts). Each signal handler can be modeled as a thread that can be executed
+at any time that a signal can be triggered. Understanding when it is meaningful
+to analyze these handlers is an open problem. One system that does reason about
+the effect of interrupts is <a class="reference external" href="http://pages.cs.wisc.edu/~davidson/fie/">FIE</a>.</p>
+</section>
+<section id="path-explosion">
+<h3>Path explosion<a class="headerlink" href="#path-explosion" title="Link to this heading">¶</a></h3>
+<p>Many approaches (such as <a class="reference external" href="https://users.ece.cmu.edu/~dbrumley/pdf/Avgerinosetal._2014_EnhancingSymbolicExecutionwithVeritesting.pdf">Veritesting</a>) attempt to mitigate the path
+explosion problem in symbolic execution. However, despite these efforts, path
+explosion is still <em>the</em> main problem preventing symbolic execution from being
+mainstream.</p>
+<p>bisa provides an excellent base to implement new techniques to control path
+explosion. Most approaches can be easily implemented as
+<a class="reference internal" href="../api.html#bisa.exploration_techniques.ExplorationTechnique" title="bisa.exploration_techniques.ExplorationTechnique"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExplorationTechnique</span></code></a> s and quickly
+evaluated (for example, on the <a class="reference external" href="https://github.com/CyberGrandChallenge/samples">CGC dataset</a>).</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">bisa</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Getting Started</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="installing.html">Installing bisa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developing.html">Reporting Bugs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developing.html#developing-bisa">Developing bisa</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Help Wanted</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../core-concepts/index.html">Core Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyses/index.html">Build-in Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced-topics/index.html">Advanced Topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-bisa/index.html">Extending bisa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">bisa examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/index.html">Appendix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Getting Started</a><ul>
+      <li>Previous: <a href="developing.html" title="previous chapter">Reporting Bugs</a></li>
+      <li>Next: <a href="../core-concepts/index.html" title="next chapter">Core Concepts</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, The bisa Project contributors.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/getting-started/helpwanted.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

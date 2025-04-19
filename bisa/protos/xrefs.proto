@@ -1,0 +1,11 @@
+
+syntax = "proto3";
+
+import "bisa/protos/primitives.proto";
+
+package bisa.protos;
+
+
+message XRefs {
+    repeated CodeReference xrefs = 1;
+}

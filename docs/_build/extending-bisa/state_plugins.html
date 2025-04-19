@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>State Plugins &#8212; bisa  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Extending the Environment Model" href="environment.html" />
+    <link rel="prev" title="Hooks and SimProcedures" href="simprocedures.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="state-plugins">
+<h1>State Plugins<a class="headerlink" href="#state-plugins" title="Link to this heading">¶</a></h1>
+<p>If you want to store some data on a state and have that information propagated
+from successor to successor, the easiest way to do this is with
+<code class="docutils literal notranslate"><span class="pre">state.globals</span></code>. However, this can become obnoxious with large amounts of
+interesting data, doesn’t work at all for merging states, and isn’t very
+object-oriented.</p>
+<p>The solution to these problems is to write a <em>State Plugin</em> - an appendix to the
+state that holds data and implements an interface for dealing with the lifecycle
+of a state.</p>
+<section id="my-first-plugin">
+<h2>My First Plugin<a class="headerlink" href="#my-first-plugin" title="Link to this heading">¶</a></h2>
+<p>Let’s get started! All state plugins are implemented as subclasses of
+<code class="docutils literal notranslate"><span class="pre">SimStatePlugin</span></code>. Once you’ve read this document, you can use the API
+reference for this class <a class="reference internal" href="../api.html#bisa.state_plugins.plugin.SimStatePlugin" title="bisa.state_plugins.plugin.SimStatePlugin"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisa.state_plugins.plugin.SimStatePlugin</span></code></a> to
+quickly review the semantics of all the interfaces you should implement.</p>
+<p>The most important method you need to implement is <code class="docutils literal notranslate"><span class="pre">copy</span></code>: it should be
+annotated with the <code class="docutils literal notranslate"><span class="pre">memo</span></code> staticmethod and take a dict called the
+“memo”—these’ll be important later—and returns a copy of the plugin. Short
+of that, you can do whatever you want. Just make sure to call the superclass
+initializer!</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">bisa</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">MyFirstPlugin</span><span class="p">(</span><span class="n">bisa</span><span class="o">.</span><span class="n">SimStatePlugin</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">foo</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="nb">super</span><span class="p">(</span><span class="n">MyFirstPlugin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">foo</span> <span class="o">=</span> <span class="n">foo</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="nd">@bisa</span><span class="o">.</span><span class="n">SimStatePlugin</span><span class="o">.</span><span class="n">memo</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="n">MyFirstPlugin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">foo</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state</span> <span class="o">=</span> <span class="n">bisa</span><span class="o">.</span><span class="n">SimState</span><span class="p">(</span><span class="n">arch</span><span class="o">=</span><span class="s1">&#39;AMD64&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="o">.</span><span class="n">register_plugin</span><span class="p">(</span><span class="s1">&#39;my_plugin&#39;</span><span class="p">,</span> <span class="n">MyFirstPlugin</span><span class="p">(</span><span class="s1">&#39;bar&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">state</span><span class="o">.</span><span class="n">my_plugin</span><span class="o">.</span><span class="n">foo</span> <span class="o">==</span> <span class="s1">&#39;bar&#39;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state2</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="o">.</span><span class="n">my_plugin</span><span class="o">.</span><span class="n">foo</span> <span class="o">=</span> <span class="s1">&#39;baz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state3</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">state2</span><span class="o">.</span><span class="n">my_plugin</span><span class="o">.</span><span class="n">foo</span> <span class="o">==</span> <span class="s1">&#39;bar&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">state3</span><span class="o">.</span><span class="n">my_plugin</span><span class="o">.</span><span class="n">foo</span> <span class="o">==</span> <span class="s1">&#39;baz&#39;</span>
+</pre></div>
+</div>
+<p>It works! Note that plugins automatically become available as attributes on the
+state. <code class="docutils literal notranslate"><span class="pre">state.get_plugin(name)</span></code> is also available as a more programmatic
+interface.</p>
+</section>
+<section id="where-s-the-state">
+<h2>Where’s the state?<a class="headerlink" href="#where-s-the-state" title="Link to this heading">¶</a></h2>
+<p>State plugins have access to the state, right? So why isn’t it part of the
+initializer? It turns out, there are a plethora of issues related to
+initialization order and dependency issues, so to simplify things as much as
+possible, the state is not part of the initializer but is rather set onto the
+state in a separate phase, by using the <code class="docutils literal notranslate"><span class="pre">set_state</span></code> method. You can override
+this state if you need to do things like propagate the state to subcomponents or
+extract architectural information.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">set_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">super</span><span class="p">(</span><span class="n">SimStatePlugin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_word</span> <span class="o">=</span> <span class="n">claripy</span><span class="o">.</span><span class="n">BVS</span><span class="p">(</span><span class="s1">&#39;my_variable&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">arch</span><span class="o">.</span><span class="n">bits</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note the <code class="docutils literal notranslate"><span class="pre">self.state</span></code>! That’s what the super <code class="docutils literal notranslate"><span class="pre">set_state</span></code> sets up.</p>
+<p>However, there’s no guarantee on what order the states will be set onto the
+plugins in, so if you need to interact with <em>other plugins</em> for initialization,
+you need to override the <code class="docutils literal notranslate"><span class="pre">init_state</span></code> method.</p>
+<p>Once again, there’s no guarantee on what order these will be called in, so the
+rule is to make sure you set yourself up good enough during <code class="docutils literal notranslate"><span class="pre">set_state</span></code> so
+that if someone else tries to interact with you, no type errors will happen.
+Here’s an example of a good use of <code class="docutils literal notranslate"><span class="pre">init_state</span></code>, to map a memory region in the
+state. The use of an instance variable (presumably copied as part of <code class="docutils literal notranslate"><span class="pre">copy()</span></code>)
+ensures this only happens the first time the plugin is added to a state.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">init_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">region</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="gp">... </span>       <span class="bp">self</span><span class="o">.</span><span class="n">region</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">memory</span><span class="o">.</span><span class="n">map_region</span><span class="p">(</span><span class="n">SOMEWHERE</span><span class="p">,</span> <span class="mh">0x1000</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+</pre></div>
+</div>
+<section id="note-weak-references">
+<h3>Note: weak references<a class="headerlink" href="#note-weak-references" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">self.state</span></code> is not the state itself, but rather a <a class="reference external" href="https://docs.python.org/2/library/weakref.html">weak proxy</a> to the state. You can still
+use this object as a normal state, but attempts to store it persistently will
+not work.</p>
+</section>
+</section>
+<section id="merging">
+<h2>Merging<a class="headerlink" href="#merging" title="Link to this heading">¶</a></h2>
+<p>The other element besides copying in the state lifecycle is merging. As input
+you get the plugins to merge and a list of “merge conditions” - symbolic
+booleans that are the “guard conditions” describing when the values from each
+state should actually apply.</p>
+<p>The important properties of the merge conditions are:</p>
+<ul class="simple">
+<li><p>They are mutually exclusive and span an entire domain - exactly one may be
+satisfied at once, and there will be additional constraints to ensure that at
+least one must be satisfied.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">len(merge_conditions)</span></code> == len(others) + 1, since <code class="docutils literal notranslate"><span class="pre">self</span></code> counts too.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">zip(merge_conditions,</span> <span class="pre">[self]</span> <span class="pre">+</span> <span class="pre">others)</span></code> will correctly pair merge
+conditions with plugins.</p></li>
+</ul>
+<p>During the merge function, you should <em>mutate</em> <code class="docutils literal notranslate"><span class="pre">self</span></code> to become the merged
+version of itself and all the others, with respect to the merge conditions. This
+involves using the if-then-else structure that claripy provides. Here is an
+example of constructing this merged structure by merging a bitvector instance
+variable called <code class="docutils literal notranslate"><span class="pre">myvar</span></code>, producing a binary tree of if-then-else expressions
+searching for the correct condition:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">other_plugin</span><span class="p">,</span> <span class="n">condition</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">others</span><span class="p">,</span> <span class="n">merge_conditions</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span> <span class="c1"># chop off self&#39;s condition</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">myvar</span> <span class="o">=</span> <span class="n">claripy</span><span class="o">.</span><span class="n">If</span><span class="p">(</span><span class="n">condition</span><span class="p">,</span> <span class="n">other_plugin</span><span class="o">.</span><span class="n">myvar</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">myvar</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is such a common construction that we provide a utility to perform it
+automatically: <code class="docutils literal notranslate"><span class="pre">claripy.ite_cases</span></code>. The following code snippet is identical to
+the previous one:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">myvar</span> <span class="o">=</span> <span class="n">claripy</span><span class="o">.</span><span class="n">ite_cases</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">merge_conditions</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="p">[</span><span class="n">o</span><span class="o">.</span><span class="n">myvar</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">others</span><span class="p">]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">myvar</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Keep in mind that like the rest of the top-level claripy functions,
+<code class="docutils literal notranslate"><span class="pre">ite_cases</span></code> and <code class="docutils literal notranslate"><span class="pre">If</span></code> are also available from <code class="docutils literal notranslate"><span class="pre">state.solver</span></code>, and these
+versions will perform SimActionObject unwrapping if applicable.</p>
+<section id="common-ancestor">
+<h3>Common Ancestor<a class="headerlink" href="#common-ancestor" title="Link to this heading">¶</a></h3>
+<p>The full prototype of the <code class="docutils literal notranslate"><span class="pre">merge</span></code> interface is <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">merge(self,</span> <span class="pre">others,</span>
+<span class="pre">merge_conditions,</span> <span class="pre">common_ancestor=None)</span></code>. <code class="docutils literal notranslate"><span class="pre">others</span></code> and <code class="docutils literal notranslate"><span class="pre">merge_conditions</span></code>
+have been discussed in depth already.</p>
+<p>The common ancestor is the instance of the plugin from the most recent common
+ancestor of the states being merged. It may not be available for all merges, in
+which case it will be None. There are no rules for how exactly you should use
+this to improve the quality of your merges, but you may find it useful in more
+complex setups.</p>
+</section>
+</section>
+<section id="widening">
+<h2>Widening<a class="headerlink" href="#widening" title="Link to this heading">¶</a></h2>
+<p>There is another kind of merging called <em>widening</em> which takes several states
+and produces a more general state. It is used during static analysis.</p>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>Explain what this means</p>
+</div>
+</section>
+<section id="serialization">
+<h2>Serialization<a class="headerlink" href="#serialization" title="Link to this heading">¶</a></h2>
+<p>In order to support serialization of states which contain your plugin, you
+should implement the <code class="docutils literal notranslate"><span class="pre">__getstate__</span></code>/<code class="docutils literal notranslate"><span class="pre">__setstate__</span></code> magic method pair. Keep
+in mind the following guidelines:</p>
+<ul class="simple">
+<li><p>Your serialization result should <em>not</em> include the state.</p></li>
+<li><p>After deserialization, <code class="docutils literal notranslate"><span class="pre">set_state()</span></code> will be called again.</p></li>
+</ul>
+<p>This means that plugins are “detached” from the state and serialized in an
+isolated environment, and then reattached to the state on deserialization.</p>
+</section>
+<section id="plugins-all-the-way-down">
+<h2>Plugins all the way down<a class="headerlink" href="#plugins-all-the-way-down" title="Link to this heading">¶</a></h2>
+<p>You may have components within your state plugins which are large and
+complicated and start breaking object-orientation in order to make copy/merge
+work well with the state lifecycle. You’re in luck! Things can be state plugins
+even if they aren’t directly attached to a state. A great example of this is
+<code class="docutils literal notranslate"><span class="pre">SimFile</span></code>, which is a state plugin but is stored in the filesystem plugin, and
+is never used with <code class="docutils literal notranslate"><span class="pre">SimState.register_plugin</span></code>. When you’re doing this, there
+are a handful of rules to remember which will keep your plugins safe and happy:</p>
+<ul class="simple">
+<li><p>Annotate your copy function with <code class="docutils literal notranslate"><span class="pre">&#64;SimStatePlugin.memo</span></code>.</p></li>
+<li><p>In order to prevent <em>divergence</em> while copying multiple references to the same
+plugin, make sure you’re passing the memo (the argument to copy) to the
+<code class="docutils literal notranslate"><span class="pre">.copy</span></code> of any subplugins. This with the previous point will preserve object
+identity.</p></li>
+<li><p>In order to prevent <em>duplicate merging</em> while merging multiple references to
+the same plugin, there should be a concept of the “owner” of each instance,
+and only the owner should run the merge routine.</p></li>
+<li><p>While passing arguments down into sub-plugins <code class="docutils literal notranslate"><span class="pre">merge()</span></code> routines, make sure
+you unwrap <code class="docutils literal notranslate"><span class="pre">others</span></code> and <code class="docutils literal notranslate"><span class="pre">common_ancestor</span></code> into the appropriate types. For
+example, if <code class="docutils literal notranslate"><span class="pre">PluginA</span></code> contains a <code class="docutils literal notranslate"><span class="pre">PluginB</span></code>, the former should do the
+following:</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">others</span><span class="p">,</span> <span class="n">merge_conditions</span><span class="p">,</span> <span class="n">common_ancestor</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="c1"># ... merge self</span>
+<span class="gp">... </span>    <span class="bp">self</span><span class="o">.</span><span class="n">plugin_b</span><span class="o">.</span><span class="n">merge</span><span class="p">([</span><span class="n">o</span><span class="o">.</span><span class="n">plugin_b</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">others</span><span class="p">],</span> <span class="n">merge_conditions</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">common_ancestor</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">common_ancestor</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">common_ancestor</span><span class="o">.</span><span class="n">plugin_b</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="setting-defaults">
+<h2>Setting Defaults<a class="headerlink" href="#setting-defaults" title="Link to this heading">¶</a></h2>
+<p>To make it so that a plugin will automatically become available on a state when
+requested, without having to register it with the state first, you can register
+it as a <em>default</em>. The following code example will make it so that whenever you
+access <code class="docutils literal notranslate"><span class="pre">state.my_plugin</span></code>, a new instance of <code class="docutils literal notranslate"><span class="pre">MyPlugin</span></code> will be instantiated
+and registered with the state.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">MyPlugin</span><span class="o">.</span><span class="n">register_default</span><span class="p">(</span><span class="s1">&#39;my_plugin&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">bisa</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core-concepts/index.html">Core Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyses/index.html">Build-in Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced-topics/index.html">Advanced Topics</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Extending bisa</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="simprocedures.html">Hooks and SimProcedures</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">State Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="environment.html">Extending the Environment Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis_writing.html">Writing Analyses</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">bisa examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/index.html">Appendix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Extending bisa</a><ul>
+      <li>Previous: <a href="simprocedures.html" title="previous chapter">Hooks and SimProcedures</a></li>
+      <li>Next: <a href="environment.html" title="next chapter">Extending the Environment Model</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, The bisa Project contributors.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/extending-bisa/state_plugins.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

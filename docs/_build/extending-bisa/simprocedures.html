@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Hooks and SimProcedures &#8212; bisa  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="State Plugins" href="state_plugins.html" />
+    <link rel="prev" title="Extending bisa" href="index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="hooks-and-simprocedures">
+<h1>Hooks and SimProcedures<a class="headerlink" href="#hooks-and-simprocedures" title="Link to this heading">¶</a></h1>
+<p>Hooks in bisa are very powerful! You can use them to modify a program’s behavior
+in any way you could imagine. However, the exact way you might want to program a
+specific hook may be non-obvious. This chapter should serve as a guide when
+programming SimProcedures.</p>
+<section id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading">¶</a></h2>
+<p>Here’s an example that will remove all bugs from any program:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">bisa</span><span class="w"> </span><span class="kn">import</span> <span class="n">Project</span><span class="p">,</span> <span class="n">SimProcedure</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">project</span> <span class="o">=</span> <span class="n">Project</span><span class="p">(</span><span class="s1">&#39;examples/fauxware/fauxware&#39;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">BugFree</span><span class="p">(</span><span class="n">SimProcedure</span><span class="p">):</span>
+<span class="gp">... </span>   <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">):</span>
+<span class="gp">... </span>       <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Program running with argc=</span><span class="si">%s</span><span class="s1"> and argv=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">))</span>
+<span class="gp">... </span>       <span class="k">return</span> <span class="mi">0</span>
+
+<span class="go"># this assumes we have symbols for the binary</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">project</span><span class="o">.</span><span class="n">hook_symbol</span><span class="p">(</span><span class="s1">&#39;main&#39;</span><span class="p">,</span> <span class="n">BugFree</span><span class="p">())</span>
+
+<span class="go"># Run a quick execution!</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">simgr</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">simulation_manager</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">simgr</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>  <span class="c1"># step until no more active states</span>
+<span class="go">Program running with argc=&lt;SAO &lt;BV64 0x0&gt;&gt; and argv=&lt;SAO &lt;BV64 0x7fffffffffeffa0&gt;&gt;</span>
+<span class="go">&lt;SimulationManager with 1 deadended&gt;</span>
+</pre></div>
+</div>
+<p>Now, whenever program execution reaches the main function, instead of executing
+the actual main function, it will execute this procedure! It just prints out a
+message, and returns.</p>
+<p>Now, let’s talk about what happens on the edge of this function! When entering
+the function, where do the values that go into the arguments come from? You can
+define your <code class="docutils literal notranslate"><span class="pre">run()</span></code> function with however many arguments you like, and the
+SimProcedure runtime will automatically extract from the program state those
+arguments for you, via a <a class="reference internal" href="../advanced-topics/structured_data.html#working-with-calling-conventions"><span class="std std-ref">calling convention</span></a>, and call your run function with them. Similarly, when you return
+a value from the run function, it is placed into the state (again, according to
+the calling convention), and the actual control-flow action of returning from a
+function is performed, which depending on the architecture may involve jumping
+to the link register or jumping to the result of a stack pop.</p>
+<p>It should be clear at this point that the SimProcedure we just wrote is meant to
+totally replace whatever function it is hooked over top of. In fact, the
+original use case for SimProcedures was replacing library functions. More on
+that later.</p>
+</section>
+<section id="implementation-context">
+<h2>Implementation Context<a class="headerlink" href="#implementation-context" title="Link to this heading">¶</a></h2>
+<p>On a <code class="docutils literal notranslate"><span class="pre">Project</span></code> class, the dict <code class="docutils literal notranslate"><span class="pre">project._sim_procedures</span></code> is a mapping from
+address to <code class="docutils literal notranslate"><span class="pre">SimProcedure</span></code> instances. When the <a class="reference internal" href="../advanced-topics/pipeline.html#understanding-the-execution-pipeline"><span class="std std-ref">execution pipeline</span></a> reaches an address that is present in
+that dict, that is, an address that is hooked, it will execute
+<code class="docutils literal notranslate"><span class="pre">project._sim_procedures[address].execute(state)</span></code>. This will consult the
+calling convention to extract the arguments, make a copy of itself in order to
+preserve thread safety, and run the <code class="docutils literal notranslate"><span class="pre">run()</span></code> method. It is important to produce
+a new instance of the SimProcedure for each time it is run, since the process of
+running a SimProcedure necessarily involves mutating state on the SimProcedure
+instance, so we need separate ones for each step, lest we run into race
+conditions in multithreaded environments.</p>
+<section id="kwargs">
+<h3>kwargs<a class="headerlink" href="#kwargs" title="Link to this heading">¶</a></h3>
+<p>This hierarchy implies that you might want to reuse a single SimProcedure in
+multiple hooks. What if you want to hook the same SimProcedure in several
+places, but tweaked slightly each time? bisa’s support for this is that any
+additional keyword arguments you pass to the constructor of your SimProcedure
+will end up getting passed as keyword args to your SimProcedure’s <code class="docutils literal notranslate"><span class="pre">run()</span></code>
+method. Pretty cool!</p>
+</section>
+</section>
+<section id="data-types">
+<h2>Data Types<a class="headerlink" href="#data-types" title="Link to this heading">¶</a></h2>
+<p>If you were paying attention to the example earlier, you noticed that when we
+printed out the arguments to the <code class="docutils literal notranslate"><span class="pre">run()</span></code> function, they came out as a weird
+<code class="docutils literal notranslate"><span class="pre">&lt;SAO</span> <span class="pre">&lt;BV64</span> <span class="pre">0xSTUFF&gt;&gt;</span></code> class. This is a <code class="docutils literal notranslate"><span class="pre">SimActionObject</span></code>. Basically, you
+don’t need to worry about it too much, it’s just a thin wrapper over a normal
+bitvector. It does a bit of tracking of what exactly you do with it inside the
+SimProcedure—this is helpful for static analysis.</p>
+<p>You may also have noticed that we directly returned the Python int <code class="docutils literal notranslate"><span class="pre">0</span></code> from
+the procedure. This will automatically be promoted to a word-sized bitvector!
+You can return a native number, a bitvector, or a SimActionObject.</p>
+<p>When you want to write a procedure that deals with floating point numbers, you
+will need to specify the calling convention manually. It’s not too hard, just
+provide a cc to the hook: <code class="docutils literal notranslate"><span class="pre">`cc</span> <span class="pre">=</span> <span class="pre">project.factory.cc_from_arg_kinds((True,</span>
+<span class="pre">True),</span> <span class="pre">ret_fp=True)</span></code> and <code class="docutils literal notranslate"><span class="pre">project.hook(address,</span> <span class="pre">ProcedureClass(cc=mycc))</span></code>
+This method for passing in a calling convention works for all calling
+conventions, so if bisa’s autodetected one isn’t right, you can fix that.</p>
+</section>
+<section id="control-flow">
+<h2>Control Flow<a class="headerlink" href="#control-flow" title="Link to this heading">¶</a></h2>
+<p>How can you exit a SimProcedure? We’ve already gone over the simplest way to do
+this, returning a value from <code class="docutils literal notranslate"><span class="pre">run()</span></code>. This is actually shorthand for calling
+<code class="docutils literal notranslate"><span class="pre">self.ret(value)</span></code>. <code class="docutils literal notranslate"><span class="pre">self.ret()</span></code> is the function which knows how to perform
+the specific action of returning from a function.</p>
+<p>SimProcedures can use lots of different functions like this!</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ret(expr)</span></code>: Return from a function</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">jump(addr)</span></code>: Jump to an address in the binary</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exit(code)</span></code>: Terminate the program</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">call(addr,</span> <span class="pre">args,</span> <span class="pre">continue_at)</span></code>: Call a function in the binary</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">inline_call(procedure,</span> <span class="pre">*args)</span></code>: Call another SimProcedure in-line and
+return the results</p></li>
+</ul>
+<p>That second-last one deserves some looking-at. We’ll get there after a quick
+detour…</p>
+<section id="conditional-exits">
+<h3>Conditional Exits<a class="headerlink" href="#conditional-exits" title="Link to this heading">¶</a></h3>
+<p>What if we want to add a conditional branch out of a SimProcedure? In order to
+do that, you’ll need to work directly with the SimSuccessors object for the
+current execution step.</p>
+<p>The interface for this is <code class="docutils literal notranslate"><span class="pre">`self.successors.add_successor(state,</span> <span class="pre">addr,</span> <span class="pre">guard,</span>
+<span class="pre">jumpkind)</span></code>. All of these parameters should have an obvious meaning if you’ve
+followed along so far. Keep in mind that the state you pass in will NOT be
+copied and WILL be mutated, so be sure to make a copy beforehand if there will
+be more work to do!</p>
+</section>
+<section id="simprocedure-continuations">
+<h3>SimProcedure Continuations<a class="headerlink" href="#simprocedure-continuations" title="Link to this heading">¶</a></h3>
+<p>How can we call a function in the binary and have execution resume within our
+SimProcedure? There is a whole bunch of infrastructure called the “SimProcedure
+Continuation” that will let you do this. When you use <code class="docutils literal notranslate"><span class="pre">self.call(addr,</span> <span class="pre">args,</span>
+<span class="pre">continue_at)</span></code>, <code class="docutils literal notranslate"><span class="pre">addr</span></code> is expected to be the address you’d like to call,
+<code class="docutils literal notranslate"><span class="pre">args</span></code> is the tuple of arguments you’d like to call it with, and
+<code class="docutils literal notranslate"><span class="pre">continue_at</span></code> is the name of another method in your SimProcedure class that
+you’d like execution to continue at when it returns. This method must have the
+same signature as the <code class="docutils literal notranslate"><span class="pre">run()</span></code> method. Furthermore, you can pass the keyword
+argument <code class="docutils literal notranslate"><span class="pre">cc</span></code> as the calling convention that ought to be used to communicate
+with the callee.</p>
+<p>When you do this, you finish your current step, and execution will start again
+at the next step at the function you’ve specified. When that function returns,
+it has to return to some concrete address! That address is specified by the
+SimProcedure runtime: an address is allocated in bisa’s externs segment to be
+used as the return site for returning to the given method call. It is then
+hooked with a copy of the procedure instance tweaked to run the specified
+<code class="docutils literal notranslate"><span class="pre">continue_at</span></code> function instead of <code class="docutils literal notranslate"><span class="pre">run()</span></code>, with the same args and kwargs as
+the first time.</p>
+<p>There are two pieces of metadata you need to attach to your SimProcedure class
+in order to use the continuation subsystem correctly:</p>
+<ul class="simple">
+<li><p>Set the class variable <code class="docutils literal notranslate"><span class="pre">IS_FUNCTION</span> <span class="pre">=</span> <span class="pre">True</span></code></p></li>
+<li><p>Set the class variable <code class="docutils literal notranslate"><span class="pre">local_vars</span></code> to a tuple of strings, where each string
+is the name of an instance variable on your SimProcedure whose value you would
+like to persist to when you return. Local variables can be any type so long as
+you don’t mutate their instances.</p></li>
+</ul>
+<p>You may have guessed by now that there exists some sort of auxiliary storage in
+order to hold on to all this data. You would be right! The state plugin
+<code class="docutils literal notranslate"><span class="pre">state.callstack</span></code> has an entry called <code class="docutils literal notranslate"><span class="pre">.procedure_data</span></code> which is used by the
+SimProcedure runtime to store information local to the current call frame. bisa
+tracks the stack pointer in order to make the current top of the
+<code class="docutils literal notranslate"><span class="pre">state.callstack</span></code> a meaningful local data store. It’s stuff that ought to be
+stored in memory in a stack frame, but the data can’t be serialized and/or
+memory allocation is hard.</p>
+<p>As an example, let’s look at the SimProcedure that bisa uses internally to run
+all the shared library initializers for a <code class="docutils literal notranslate"><span class="pre">full_init_state</span></code> for a linux
+program:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">LinuxLoader</span><span class="p">(</span><span class="n">bisa</span><span class="o">.</span><span class="n">SimProcedure</span><span class="p">):</span>
+    <span class="n">NO_RET</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">IS_FUNCTION</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">local_vars</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;initializers&#39;</span><span class="p">,)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initializers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">initializers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_initializer</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_initializer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_simos</span><span class="o">.</span><span class="n">set_entry_register_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">jump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">entry</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">addr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initializers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">posix</span><span class="o">.</span><span class="n">argc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">posix</span><span class="o">.</span><span class="n">argv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">posix</span><span class="o">.</span><span class="n">environ</span><span class="p">),</span> <span class="s1">&#39;run_initializer&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is a particularly clever usage of the SimProcedure continuations. First,
+notice that the current project is available for use on the procedure instance.
+This is some powerful stuff you can get yourself into; for safety you generally
+only want to use the project as a read-only or append-only data structure. Here
+we’re just getting the list of dynamic initializers from the loader. Then, for as
+long as the list isn’t empty, we pop a single function pointer out of the list,
+being careful not to mutate the list, since the list object is shared across
+states, and then call it, returning to the <code class="docutils literal notranslate"><span class="pre">run_initializer</span></code> function again.
+When we run out of initializers, we set up the entry state and jump to the
+program entry point.</p>
+<p>Very cool!</p>
+</section>
+</section>
+<section id="global-variables">
+<h2>Global Variables<a class="headerlink" href="#global-variables" title="Link to this heading">¶</a></h2>
+<p>As a brief aside, you can store global variables in <code class="docutils literal notranslate"><span class="pre">state.globals</span></code>. This is a
+dictionary that just gets shallow-copied from state to successor state. Because
+it’s only a shallow copy, its members are the same instances, so the same rules
+as local variables in SimProcedure continuations apply. You need to be careful
+not to mutate any item that is used as a global variable unless you know exactly
+what you’re doing.</p>
+</section>
+<section id="helping-out-static-analysis">
+<h2>Helping out static analysis<a class="headerlink" href="#helping-out-static-analysis" title="Link to this heading">¶</a></h2>
+<p>We’ve already looked at the class variable <code class="docutils literal notranslate"><span class="pre">IS_FUNCTION</span></code>, which allows you to
+use the SimProcedure continuation. There are a few more class variables you can
+set, though these ones have no direct benefit to you - they merely mark
+attributes of your function so that static analysis knows what it’s doing.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">NO_RET</span></code>: Set this to true if control flow will never return from this
+function</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ADDS_EXITS</span></code>: Set this to true if you do any control flow other than
+returning</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IS_SYSCALL</span></code>: Self-explanatory</p></li>
+</ul>
+<p>Furthermore, if you set <code class="docutils literal notranslate"><span class="pre">ADDS_EXITS</span> <span class="pre">=</span> <span class="pre">True</span></code>, you’ll need to define the method
+<code class="docutils literal notranslate"><span class="pre">static_exits()</span></code>. This function takes a single parameter, a list of IRSBs that
+would be executed in the run-up to your function, and asks you to return a list
+of all the exits that you know would be produced by your function in that case.
+The return value is expected to be a list of tuples of (address (int), jumpkind
+(str)). This is meant to be a quick, best-effort analysis, and you shouldn’t try
+to do anything crazy or intensive to get your answer.</p>
+</section>
+<section id="user-hooks">
+<h2>User Hooks<a class="headerlink" href="#user-hooks" title="Link to this heading">¶</a></h2>
+<p>The process of writing and using a SimProcedure makes a lot of assumptions that
+you want to hook over a whole function. What if you don’t? There’s an alternate
+interface for hooking, a <em>user hook</em>, that lets you streamline the process of
+hooking sections of code.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@project</span><span class="o">.</span><span class="n">hook</span><span class="p">(</span><span class="mh">0x1234</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">set_rax</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rax</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>This is a lot simpler! The idea is to use a single function instead of an entire
+SimProcedure subclass. No extraction of arguments is performed, no complex
+control flow happens.</p>
+<p>Control flow is controlled by the length argument. After the function finishes
+executing in this example, the next step will start at 5 bytes after the hooked
+address. If the length argument is omitted or set to zero, execution will resume
+executing the binary code at exactly the hooked address, without re-triggering
+the hook. The <code class="docutils literal notranslate"><span class="pre">Ijk_NoHook</span></code> jumpkind allows this to happen.</p>
+<p>If you want more control over control flow coming out of a user hook, you can
+return a list of successor states. Each successor will be expected to have
+<code class="docutils literal notranslate"><span class="pre">state.regs.ip</span></code>, <code class="docutils literal notranslate"><span class="pre">state.scratch.guard</span></code>, and <code class="docutils literal notranslate"><span class="pre">state.scratch.jumpkind</span></code> set.
+The IP is the target instruction pointer, the guard is a symbolic boolean
+representing a constraint to add to the state related to it being taken as
+opposed to the others, and the jumpkind is a VEX enum string, like
+<code class="docutils literal notranslate"><span class="pre">Ijk_Boring</span></code>, representing the nature of the branch.</p>
+<p>The general rule is, if you want your SimProcedure to either be able to extract
+function arguments or cause a program return, write a full SimProcedure class.
+Otherwise, use a user hook.</p>
+</section>
+<section id="hooking-symbols">
+<h2>Hooking Symbols<a class="headerlink" href="#hooking-symbols" title="Link to this heading">¶</a></h2>
+<p>As you should recall from the <a class="reference internal" href="../core-concepts/loading.html#loading-a-binary"><span class="std std-ref">section on loading a binary</span></a>, dynamically linked programs have a list of symbols that they must
+import from the libraries they have listed as dependencies, and bisa will make
+sure, rain or shine, that every import symbol gets resolved by <em>some</em> address,
+whether it’s a real implementation of the function or just a dummy address hooked
+with a do-nothing stub. As a result, you can just use the
+<code class="docutils literal notranslate"><span class="pre">Project.hook_symbol</span></code> API to hook the address referred to by a symbol!</p>
+<p>This means that you can replace library functions with your own code. For
+instance, to replace <code class="docutils literal notranslate"><span class="pre">rand()</span></code> with a function that always returns a consistent
+sequence of values:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">NotVeryRand</span><span class="p">(</span><span class="n">SimProcedure</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">return_values</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="n">rand_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">globals</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;rand_idx&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">return_values</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">out</span> <span class="o">=</span> <span class="n">return_values</span><span class="p">[</span><span class="n">rand_idx</span><span class="p">]</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">globals</span><span class="p">[</span><span class="s1">&#39;rand_idx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rand_idx</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="n">out</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">project</span><span class="o">.</span><span class="n">hook_symbol</span><span class="p">(</span><span class="s1">&#39;rand&#39;</span><span class="p">,</span> <span class="n">NotVeryRand</span><span class="p">(</span><span class="n">return_values</span><span class="o">=</span><span class="p">[</span><span class="mi">413</span><span class="p">,</span> <span class="mi">612</span><span class="p">,</span> <span class="mi">1025</span><span class="p">,</span> <span class="mi">1111</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p>Now, whenever the program tries to call <code class="docutils literal notranslate"><span class="pre">rand()</span></code>, it’ll return the integers
+from the <code class="docutils literal notranslate"><span class="pre">return_values</span></code> array in a loop.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">bisa</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core-concepts/index.html">Core Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyses/index.html">Build-in Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced-topics/index.html">Advanced Topics</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Extending bisa</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Hooks and SimProcedures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="state_plugins.html">State Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="environment.html">Extending the Environment Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis_writing.html">Writing Analyses</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">bisa examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/index.html">Appendix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Extending bisa</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Extending bisa</a></li>
+      <li>Next: <a href="state_plugins.html" title="next chapter">State Plugins</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, The bisa Project contributors.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/extending-bisa/simprocedures.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

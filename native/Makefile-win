@@ -1,0 +1,8 @@
+CC=cl
+INCFLAGS=/I "$(PYVEX_INCLUDE_PATH)" /I vendor
+CFLAGS=/EHsc /MD /LD /O2 $(INCFLAGS) /Zi
+LDFLAGS=/link "$(PYVEX_LIB_FILE)" /DEF:bisa_native.def /DEBUG
+
+bisa_native.dll: sim_unicorn.cpp bisa_native.def
+	$(CC) $(CFLAGS) sim_unicorn.cpp unicorn_dynamic.c $(LDFLAGS) /OUT:bisa_native.dll
+

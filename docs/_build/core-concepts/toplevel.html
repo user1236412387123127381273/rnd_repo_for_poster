@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Core Concepts &#8212; bisa  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Loading a Binary" href="loading.html" />
+    <link rel="prev" title="Core Concepts" href="index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="core-concepts">
+<h1>Core Concepts<a class="headerlink" href="#core-concepts" title="Link to this heading">¶</a></h1>
+<p>To get started with bisa, you’ll need to have a basic overview of some
+fundamental bisa concepts and how to construct some basic bisa objects. We’ll go
+over this by examining what’s directly available to you after you’ve loaded a
+binary!</p>
+<p>Your first action with bisa will always be to load a binary into a <em>project</em>.
+We’ll use <code class="docutils literal notranslate"><span class="pre">/bin/true</span></code> for these examples.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">bisa</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span> <span class="o">=</span> <span class="n">bisa</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="s1">&#39;/bin/true&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>A project is your control base in bisa. With it, you will be able to dispatch
+analyses and simulations on the executable you just loaded. Almost every single
+object you work with in bisa will depend on the existence of a project in some
+form.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Using and exploring bisa in IPython (or other Python command line
+interpreters) is a main use case that we design bisa for. When you are not
+sure what interfaces are available, tab completion is your friend!</p>
+<p>Sometimes tab completion in IPython can be slow. We find the following
+workaround helpful without degrading the validity of completion results:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Drop this file in IPython profile&#39;s startup directory to avoid running it every time.</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">IPython</span>
+<span class="n">py</span> <span class="o">=</span> <span class="n">IPython</span><span class="o">.</span><span class="n">get_ipython</span><span class="p">()</span>
+<span class="n">py</span><span class="o">.</span><span class="n">Completer</span><span class="o">.</span><span class="n">use_jedi</span> <span class="o">=</span> <span class="kc">False</span>
+</pre></div>
+</div>
+</div>
+<section id="basic-properties">
+<h2>Basic properties<a class="headerlink" href="#basic-properties" title="Link to this heading">¶</a></h2>
+<p>First, we have some basic properties about the project: its CPU architecture,
+its filename, and the address of its entry point.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">monkeyhex</span> <span class="c1"># this will format numerical results in hexadecimal</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span><span class="o">.</span><span class="n">arch</span>
+<span class="go">&lt;Arch AMD64 (LE)&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span><span class="o">.</span><span class="n">entry</span>
+<span class="go">0x401670</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span><span class="o">.</span><span class="n">filename</span>
+<span class="go">&#39;/bin/true&#39;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><em>arch</em> is an instance of an <code class="docutils literal notranslate"><span class="pre">archinfo.Arch</span></code> object for whichever
+architecture the program is compiled, in this case little-endian amd64. It
+contains a ton of clerical data about the CPU it runs on, which you can peruse
+<a class="reference external" href="https://github.com/bisa/archinfo/blob/master/archinfo/arch_amd64.py">at your leisure</a>. The
+common ones you care about are <code class="docutils literal notranslate"><span class="pre">arch.bits</span></code>, <code class="docutils literal notranslate"><span class="pre">arch.bytes</span></code> (that one is a
+<code class="docutils literal notranslate"><span class="pre">&#64;property</span></code> declaration on the <a class="reference external" href="https://github.com/bisa/archinfo/blob/master/archinfo/arch.py">main Arch class</a>),
+<code class="docutils literal notranslate"><span class="pre">arch.name</span></code>, and <code class="docutils literal notranslate"><span class="pre">arch.memory_endness</span></code>.</p></li>
+<li><p><em>entry</em> is the entry point of the binary!</p></li>
+<li><p><em>filename</em> is the absolute filename of the binary. Riveting stuff!</p></li>
+</ul>
+</section>
+<section id="loading">
+<h2>Loading<a class="headerlink" href="#loading" title="Link to this heading">¶</a></h2>
+<p>Getting from a binary file to its representation in a virtual address space is
+pretty complicated! We have a module called CLE to handle that. CLE’s result,
+called the loader, is available in the <code class="docutils literal notranslate"><span class="pre">.loader</span></code> property. We’ll get into
+detail on how to use this <a class="reference internal" href="loading.html#loading-a-binary"><span class="std std-ref">soon</span></a>, but for now just know
+that you can use it to see the shared libraries that bisa loaded alongside your
+program and perform basic queries about the loaded address space.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span><span class="o">.</span><span class="n">loader</span>
+<span class="go">&lt;Loaded true, maps [0x400000:0x5004000]&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">shared_objects</span> <span class="c1"># may look a little different for you!</span>
+<span class="go">{&#39;ld-linux-x86-64.so.2&#39;: &lt;ELF Object ld-2.24.so, maps [0x2000000:0x2227167]&gt;,</span>
+<span class="go"> &#39;libc.so.6&#39;: &lt;ELF Object libc-2.24.so, maps [0x1000000:0x13c699f]&gt;}</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">min_addr</span>
+<span class="go">0x400000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">max_addr</span>
+<span class="go">0x5004000</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">main_object</span>  <span class="c1"># we&#39;ve loaded several binaries into this project. Here&#39;s the main one!</span>
+<span class="go">&lt;ELF Object true, maps [0x400000:0x60721f]&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">main_object</span><span class="o">.</span><span class="n">execstack</span>  <span class="c1"># sample query: does this binary have an executable stack?</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">main_object</span><span class="o">.</span><span class="n">pic</span>  <span class="c1"># sample query: is this binary position-independent?</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</section>
+<section id="the-factory">
+<h2>The factory<a class="headerlink" href="#the-factory" title="Link to this heading">¶</a></h2>
+<p>There are a lot of classes in bisa, and most of them require a project to be
+instantiated. Instead of making you pass around the project everywhere, we
+provide <code class="docutils literal notranslate"><span class="pre">project.factory</span></code>, which has several convenient constructors for
+common objects you’ll want to use frequently.</p>
+<p>This section will also serve as an introduction to several basic bisa concepts.
+Strap in!</p>
+<section id="blocks">
+<h3>Blocks<a class="headerlink" href="#blocks" title="Link to this heading">¶</a></h3>
+<p>First, we have <code class="docutils literal notranslate"><span class="pre">project.factory.block()</span></code>, which is used to extract a <a class="reference external" href="https://en.wikipedia.org/wiki/Basic_block">basic
+block</a> of code from a given
+address. This is an important fact - <em>bisa analyzes code in units of basic
+blocks.</em> You will get back a Block object, which can tell you lots of fun things
+about the block of code:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">block</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">block</span><span class="p">(</span><span class="n">proj</span><span class="o">.</span><span class="n">entry</span><span class="p">)</span> <span class="c1"># lift a block of code from the program&#39;s entry point</span>
+<span class="go">&lt;Block for 0x401670, 42 bytes&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">block</span><span class="o">.</span><span class="n">pp</span><span class="p">()</span>                          <span class="c1"># pretty-print a disassembly to stdout</span>
+<span class="go">0x401670:       xor     ebp, ebp</span>
+<span class="go">0x401672:       mov     r9, rdx</span>
+<span class="go">0x401675:       pop     rsi</span>
+<span class="go">0x401676:       mov     rdx, rsp</span>
+<span class="go">0x401679:       and     rsp, 0xfffffffffffffff0</span>
+<span class="go">0x40167d:       push    rax</span>
+<span class="go">0x40167e:       push    rsp</span>
+<span class="go">0x40167f:       lea     r8, [rip + 0x2e2a]</span>
+<span class="go">0x401686:       lea     rcx, [rip + 0x2db3]</span>
+<span class="go">0x40168d:       lea     rdi, [rip - 0xd4]</span>
+<span class="go">0x401694:       call    qword ptr [rip + 0x205866]</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">block</span><span class="o">.</span><span class="n">instructions</span>                  <span class="c1"># how many instructions are there?</span>
+<span class="go">0xb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">block</span><span class="o">.</span><span class="n">instruction_addrs</span>             <span class="c1"># what are the addresses of the instructions?</span>
+<span class="go">[0x401670, 0x401672, 0x401675, 0x401676, 0x401679, 0x40167d, 0x40167e, 0x40167f, 0x401686, 0x40168d, 0x401694]</span>
+</pre></div>
+</div>
+<p>Additionally, you can use a Block object to get other representations of the
+block of code:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">block</span><span class="o">.</span><span class="n">capstone</span>                       <span class="c1"># capstone disassembly</span>
+<span class="go">&lt;CapstoneBlock for 0x401670&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">block</span><span class="o">.</span><span class="n">vex</span>                            <span class="c1"># VEX IRSB (that&#39;s a Python internal address, not a program address)</span>
+<span class="go">&lt;pyvex.block.IRSB at 0x7706330&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="states">
+<h3>States<a class="headerlink" href="#states" title="Link to this heading">¶</a></h3>
+<p>Here’s another fact about bisa - the <code class="docutils literal notranslate"><span class="pre">Project</span></code> object only represents an
+“initialization image” for the program. When you’re performing execution with
+bisa, you are working with a specific object representing a <em>simulated program
+state</em> - a <code class="docutils literal notranslate"><span class="pre">SimState</span></code>. Let’s grab one right now!</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">state</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">entry_state</span><span class="p">()</span>
+<span class="go">&lt;SimState @ 0x401670&gt;</span>
+</pre></div>
+</div>
+<p>A SimState contains a program’s memory, registers, filesystem data… any “live
+data” that can be changed by execution has a home in the state. We’ll cover how
+to interact with states in depth later, but for now, let’s use <code class="docutils literal notranslate"><span class="pre">state.regs</span></code>
+and <code class="docutils literal notranslate"><span class="pre">state.mem</span></code> to access the registers and memory of this state:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rip</span>        <span class="c1"># get the current instruction pointer</span>
+<span class="go">&lt;BV64 0x401670&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rax</span>
+<span class="go">&lt;BV64 0x1c&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="n">proj</span><span class="o">.</span><span class="n">entry</span><span class="p">]</span><span class="o">.</span><span class="n">int</span><span class="o">.</span><span class="n">resolved</span>  <span class="c1"># interpret the memory at the entry point as a C int</span>
+<span class="go">&lt;BV32 0x8949ed31&gt;</span>
+</pre></div>
+</div>
+<p>Those aren’t Python ints! Those are <em>bitvectors</em>. Python integers don’t have the
+same semantics as words on a CPU, e.g. wrapping on overflow, so we work with
+bitvectors, which you can think of as an integer as represented by a series of
+bits, to represent CPU data in bisa. Note that each bitvector has a <code class="docutils literal notranslate"><span class="pre">.length</span></code>
+property describing how wide it is in bits.</p>
+<p>We’ll learn all about how to work with them soon, but for now, here’s how to
+convert from Python ints to bitvectors and back again:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bv</span> <span class="o">=</span> <span class="n">claripy</span><span class="o">.</span><span class="n">BVV</span><span class="p">(</span><span class="mh">0x1234</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>       <span class="c1"># create a 32-bit-wide bitvector with value 0x1234</span>
+<span class="go">&lt;BV32 0x1234&gt;                               # BVV stands for bitvector value</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">bv</span><span class="p">)</span>                <span class="c1"># convert to Python int</span>
+<span class="go">0x1234</span>
+</pre></div>
+</div>
+<p>You can store these bitvectors back to registers and memory, or you can directly
+store a Python integer and it’ll be converted to a bitvector of the appropriate
+size:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rsi</span> <span class="o">=</span> <span class="n">claripy</span><span class="o">.</span><span class="n">BVV</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rsi</span>
+<span class="go">&lt;BV64 0x3&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="mh">0x1000</span><span class="p">]</span><span class="o">.</span><span class="n">long</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="mh">0x1000</span><span class="p">]</span><span class="o">.</span><span class="n">long</span><span class="o">.</span><span class="n">resolved</span>
+<span class="go">&lt;BV64 0x4&gt;</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">mem</span></code> interface is a little confusing at first, since it’s using some
+pretty hefty Python magic. The short version of how to use it is:</p>
+<ul class="simple">
+<li><p>Use array[index] notation to specify an address</p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">.&lt;type&gt;</span></code> to specify that the memory should be interpreted as
+<a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></a> (common values: char, short, int, long, size_t, uint8_t,
+uint16_t…)</p></li>
+<li><p>From there, you can either:</p>
+<ul>
+<li><p>Store a value to it, either a bitvector or a Python int</p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">.resolved</span></code> to get the value as a bitvector</p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">.concrete</span></code> to get the value as a Python int</p></li>
+</ul>
+</li>
+</ul>
+<p>There are more advanced usages that will be covered later!</p>
+<p>Finally, if you try reading some more registers you may encounter a very strange
+looking value:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rdi</span>
+<span class="go">&lt;BV64 reg_48_11_64{UNINITIALIZED}&gt;</span>
+</pre></div>
+</div>
+<p>This is still a 64-bit bitvector, but it doesn’t contain a numerical value.
+Instead, it has a name! This is called a <em>symbolic variable</em> and it is the
+underpinning of symbolic execution. Don’t panic! We will discuss all of this in
+detail exactly two chapters from now.</p>
+</section>
+<section id="simulation-managers">
+<h3>Simulation Managers<a class="headerlink" href="#simulation-managers" title="Link to this heading">¶</a></h3>
+<p>If a state lets us represent a program at a given point in time, there must be a
+way to get it to the <em>next</em> point in time. A simulation manager is the primary
+interface in bisa for performing execution, simulation, whatever you want to
+call it, with states. As a brief introduction, let’s show how to tick that state
+we created earlier forward a few basic blocks.</p>
+<p>First, we create the simulation manager we’re going to be using. The constructor
+can take a state or a list of states.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">simgr</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">simulation_manager</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+<span class="go">&lt;SimulationManager with 1 active&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">simgr</span><span class="o">.</span><span class="n">active</span>
+<span class="go">[&lt;SimState @ 0x401670&gt;]</span>
+</pre></div>
+</div>
+<p>A simulation manager can contain several <em>stashes</em> of states. The default stash,
+<code class="docutils literal notranslate"><span class="pre">active</span></code>, is initialized with the state we passed in. We could look at
+<code class="docutils literal notranslate"><span class="pre">simgr.active[0]</span></code> to look at our state some more, if we haven’t had enough!</p>
+<p>Now… get ready, we’re going to do some execution.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">simgr</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>We’ve just performed a basic block’s worth of symbolic execution! We can look at
+the active stash again, noticing that it’s been updated, and furthermore, that
+it has <strong>not</strong> modified our original state. SimState objects are treated as
+immutable by execution - you can safely use a single state as a “base” for
+multiple rounds of execution.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">simgr</span><span class="o">.</span><span class="n">active</span>
+<span class="go">[&lt;SimState @ 0x1020300&gt;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">simgr</span><span class="o">.</span><span class="n">active</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rip</span>                 <span class="c1"># new and exciting!</span>
+<span class="go">&lt;BV64 0x1020300&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rip</span>                           <span class="c1"># still the same!</span>
+<span class="go">&lt;BV64 0x401670&gt;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">/bin/true</span></code> isn’t a very good example for describing how to do interesting
+things with symbolic execution, so we’ll stop here for now.</p>
+</section>
+</section>
+<section id="analyses">
+<h2>Analyses<a class="headerlink" href="#analyses" title="Link to this heading">¶</a></h2>
+<p>bisa comes pre-packaged with several built-in analyses that you can use to extract some fun kinds of information from a program. Here they are:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span><span class="o">.</span><span class="n">analyses</span><span class="o">.</span>            <span class="c1"># Press TAB here in ipython to get an autocomplete-listing of everything:</span>
+<span class="go"> proj.analyses.BackwardSlice        proj.analyses.CongruencyCheck      proj.analyses.reload_analyses</span>
+<span class="go"> proj.analyses.BinaryOptimizer      proj.analyses.DDG                  proj.analyses.StaticHooker</span>
+<span class="go"> proj.analyses.BinDiff              proj.analyses.DFG                  proj.analyses.VariableRecovery</span>
+<span class="go"> proj.analyses.BoyScout             proj.analyses.Disassembly          proj.analyses.VariableRecoveryFast</span>
+<span class="go"> proj.analyses.CDG                  proj.analyses.GirlScout            proj.analyses.Veritesting</span>
+<span class="go"> proj.analyses.CFG                  proj.analyses.Identifier           proj.analyses.VFG</span>
+<span class="go"> proj.analyses.CFGEmulated          proj.analyses.LoopFinder           proj.analyses.VSA_DDG</span>
+<span class="go"> proj.analyses.CFGFast              proj.analyses.Reassembler</span>
+</pre></div>
+</div>
+<p>A couple of these are documented later in this book, but in general, if you want
+to find how to use a given analysis, you should look in the api documentation
+for <a class="reference internal" href="../api.html#module-bisa.analyses" title="bisa.analyses"><code class="xref py py-mod docutils literal notranslate"><span class="pre">bisa.analyses</span></code></a>. As an extremely brief example: here’s how you
+construct and use a quick control-flow graph:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Originally, when we loaded this binary it also loaded all its dependencies into the same virtual address  space</span>
+<span class="c1"># This is undesirable for most analysis.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">proj</span> <span class="o">=</span> <span class="n">bisa</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="s1">&#39;/bin/true&#39;</span><span class="p">,</span> <span class="n">auto_load_libs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">cfg</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">analyses</span><span class="o">.</span><span class="n">CFGFast</span><span class="p">()</span>
+<span class="o">&lt;</span><span class="n">CFGFast</span> <span class="n">Analysis</span> <span class="n">Result</span> <span class="n">at</span> <span class="mh">0x2d85130</span><span class="o">&gt;</span>
+
+<span class="c1"># cfg.graph is a networkx DiGraph full of CFGNode instances</span>
+<span class="c1"># You should go look up the networkx APIs to learn how to use this!</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">cfg</span><span class="o">.</span><span class="n">graph</span>
+<span class="o">&lt;</span><span class="n">networkx</span><span class="o">.</span><span class="n">classes</span><span class="o">.</span><span class="n">digraph</span><span class="o">.</span><span class="n">DiGraph</span> <span class="n">at</span> <span class="mh">0x2da43a0</span><span class="o">&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">())</span>
+<span class="mi">951</span>
+
+<span class="c1"># To get the CFGNode for a given address, use cfg.get_any_node</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">entry_node</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">get_any_node</span><span class="p">(</span><span class="n">proj</span><span class="o">.</span><span class="n">entry</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">successors</span><span class="p">(</span><span class="n">entry_node</span><span class="p">)))</span>
+<span class="mi">2</span>
+</pre></div>
+</div>
+</section>
+<section id="now-what">
+<h2>Now what?<a class="headerlink" href="#now-what" title="Link to this heading">¶</a></h2>
+<p>Having read this page, you should now be acquainted with several important bisa
+concepts: basic blocks, states, bitvectors, simulation managers, and analyses.
+You can’t really do anything interesting besides just use bisa as a glorified
+debugger, though! Keep reading, and you will unlock deeper powers…</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">bisa</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Core Concepts</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Core Concepts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="loading.html">Loading a Binary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver.html">Symbolic Expressions and Constraint Solving</a></li>
+<li class="toctree-l2"><a class="reference internal" href="states.html">Machine State - memory, registers, and so on</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pathgroups.html">Simulation Managers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation.html">Simulation  and Instrumentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analyses.html">Analyses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symbolic.html">Symbolic Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="be_creative.html">A final word of advice</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../analyses/index.html">Build-in Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced-topics/index.html">Advanced Topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-bisa/index.html">Extending bisa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">bisa examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/index.html">Appendix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Core Concepts</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Core Concepts</a></li>
+      <li>Next: <a href="loading.html" title="next chapter">Loading a Binary</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, The bisa Project contributors.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/core-concepts/toplevel.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

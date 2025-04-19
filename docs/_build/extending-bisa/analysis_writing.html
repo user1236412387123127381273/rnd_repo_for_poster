@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Writing Analyses &#8212; bisa  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="bisa examples" href="../examples.html" />
+    <link rel="prev" title="Extending the Environment Model" href="environment.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="writing-analyses">
+<h1>Writing Analyses<a class="headerlink" href="#writing-analyses" title="Link to this heading">¶</a></h1>
+<p>An analysis can be created by subclassing the <code class="docutils literal notranslate"><span class="pre">bisa.Analysis</span></code> class. In this
+section, we’ll create a mock analysis to show off the various features. Let’s
+start with something simple:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">bisa</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">MockAnalysis</span><span class="p">(</span><span class="n">bisa</span><span class="o">.</span><span class="n">Analysis</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">option</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">option</span> <span class="o">=</span> <span class="n">option</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bisa</span><span class="o">.</span><span class="n">AnalysesHub</span><span class="o">.</span><span class="n">register_default</span><span class="p">(</span><span class="s1">&#39;MockAnalysis&#39;</span><span class="p">,</span> <span class="n">MockAnalysis</span><span class="p">)</span> <span class="c1"># register the class with bisa&#39;s global analysis list</span>
+</pre></div>
+</div>
+<p>This is a very simple analysis – it takes an option, and stores it. Of course,
+it’s not useful, but this is just a demonstration.</p>
+<p>Let’s see how to run our new analysis:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span> <span class="o">=</span> <span class="n">bisa</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="s2">&quot;/bin/true&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mock</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">analyses</span><span class="o">.</span><span class="n">MockAnalysis</span><span class="p">(</span><span class="s1">&#39;this is my option&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">mock</span><span class="o">.</span><span class="n">option</span> <span class="o">==</span> <span class="s1">&#39;this is my option&#39;</span>
+</pre></div>
+</div>
+<section id="working-with-projects">
+<h2>Working with projects<a class="headerlink" href="#working-with-projects" title="Link to this heading">¶</a></h2>
+<p>Via some Python magic, your analysis will automatically have the project upon
+which you are running it under the <code class="docutils literal notranslate"><span class="pre">self.project</span></code> property. Use this to
+interact with your project and analyze it!</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">ProjectSummary</span><span class="p">(</span><span class="n">bisa</span><span class="o">.</span><span class="n">Analysis</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;This project is a </span><span class="si">%s</span><span class="s1"> binary with an entry point at </span><span class="si">%#x</span><span class="s1">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">arch</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">entry</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bisa</span><span class="o">.</span><span class="n">AnalysesHub</span><span class="o">.</span><span class="n">register_default</span><span class="p">(</span><span class="s1">&#39;ProjectSummary&#39;</span><span class="p">,</span> <span class="n">ProjectSummary</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span> <span class="o">=</span> <span class="n">bisa</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="s2">&quot;/bin/true&quot;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">summary</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">analyses</span><span class="o">.</span><span class="n">ProjectSummary</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">summary</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
+<span class="go">This project is a AMD64 binary with an entry point at 0x401410.</span>
+</pre></div>
+</div>
+</section>
+<section id="analysis-resilience">
+<h2>Analysis Resilience<a class="headerlink" href="#analysis-resilience" title="Link to this heading">¶</a></h2>
+<p>Sometimes, your (or our) code might suck and analyses might throw exceptions. We
+understand, and we also understand that oftentimes a partial result is better
+than nothing. This is specifically true when, for example, running an analysis
+on all of the functions in a program. Even if some of the functions fails, we
+still want to know the results of the functions that do not.</p>
+<p>To facilitate this, the <code class="docutils literal notranslate"><span class="pre">Analysis</span></code> base class provides a resilience context
+manager under <code class="docutils literal notranslate"><span class="pre">self._resilience</span></code>. Here’s an example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">ComplexFunctionAnalysis</span><span class="p">(</span><span class="n">bisa</span><span class="o">.</span><span class="n">Analysis</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">_cfg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">analyses</span><span class="o">.</span><span class="n">CFG</span><span class="p">()</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="p">{</span> <span class="p">}</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">addr</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cfg</span><span class="o">.</span><span class="n">function_manager</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="gp">... </span>            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resilience</span><span class="p">():</span>
+<span class="gp">... </span>                <span class="k">if</span> <span class="n">addr</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="gp">... </span>                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;can&#39;t handle functions at even addresses&quot;</span><span class="p">)</span>
+<span class="gp">... </span>                <span class="k">else</span><span class="p">:</span>
+<span class="gp">... </span>                    <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">addr</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;GOOD&quot;</span>
+</pre></div>
+</div>
+<p>The context manager catches any exceptions thrown and logs them (as a tuple of
+the exception type, message, and traceback) to <code class="docutils literal notranslate"><span class="pre">self.errors</span></code>. These are also
+saved and loaded when the analysis is saved and loaded (although the traceback
+is discarded, as it is not picklable).</p>
+<p>You can tune the effects of the resilience with two optional keyword parameters
+to <code class="docutils literal notranslate"><span class="pre">self._resilience()</span></code>.</p>
+<p>The first is <code class="docutils literal notranslate"><span class="pre">name</span></code>, which affects where the error is logged. By default,
+errors are placed in <code class="docutils literal notranslate"><span class="pre">self.errors</span></code>, but if <code class="docutils literal notranslate"><span class="pre">name</span></code> is provided, then
+instead the error is logged to <code class="docutils literal notranslate"><span class="pre">self.named_errors</span></code>, which is a dict mapping
+<code class="docutils literal notranslate"><span class="pre">name</span></code> to a list of all the errors that were caught under that name. This
+allows you to easily tell where thrown without examining its traceback.</p>
+<p>The second argument is <code class="docutils literal notranslate"><span class="pre">exception</span></code>, which should be the type of the
+exception that <code class="docutils literal notranslate"><span class="pre">resilience</span></code> should catch. This defaults to <code class="docutils literal notranslate"><span class="pre">Exception</span></code>,
+which handles (and logs) almost anything that could go wrong. You can also pass
+a tuple of exception types to this option, in which case all of them will be
+caught.</p>
+<p>Using <code class="docutils literal notranslate"><span class="pre">resilience</span></code> has a few advantages:</p>
+<ol class="arabic simple">
+<li><p>Your exceptions are gracefully logged and easily accessible afterwards. This
+is really nice for writing testcases.</p></li>
+<li><p>When creating your analysis, the user can pass <code class="docutils literal notranslate"><span class="pre">fail_fast=True</span></code>, which
+transparently disable the resilience, which is really nice for manual
+testing.</p></li>
+<li><p>It’s prettier than having <code class="docutils literal notranslate"><span class="pre">try</span></code> <code class="docutils literal notranslate"><span class="pre">except</span></code> everywhere.</p></li>
+</ol>
+<p>Have fun with analyses! Once you master the rest of bisa, you can use analyses
+to understand anything computable!</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">bisa</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core-concepts/index.html">Core Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyses/index.html">Build-in Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced-topics/index.html">Advanced Topics</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Extending bisa</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="simprocedures.html">Hooks and SimProcedures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="state_plugins.html">State Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="environment.html">Extending the Environment Model</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Writing Analyses</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">bisa examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/index.html">Appendix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Extending bisa</a><ul>
+      <li>Previous: <a href="environment.html" title="previous chapter">Extending the Environment Model</a></li>
+      <li>Next: <a href="../examples.html" title="next chapter">bisa examples</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, The bisa Project contributors.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/extending-bisa/analysis_writing.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

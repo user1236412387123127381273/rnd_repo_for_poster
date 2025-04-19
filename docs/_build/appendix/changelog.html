@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Changelog &#8212; bisa  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Migrating to bisa 9.1" href="migration-9.1.html" />
+    <link rel="prev" title="CTF Challenge Examples" href="more-examples.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="changelog">
+<h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading">¶</a></h1>
+<p>This lists the <em>major</em> changes in bisa.
+Tracking minor changes are left as an exercise for the reader :-)</p>
+<section id="bisa-9-1">
+<h2>bisa 9.1<a class="headerlink" href="#bisa-9-1" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>(#2961) Refactored SimCC to support passing and returning structs and arrays by value</p></li>
+<li><p>(#2964) Functions from the knowledge base may now be pretty-printed, showing colors and reference arrows</p></li>
+<li><p>Improved <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">bisa</span></code> speed substantially</p></li>
+<li><p>(#2948) RDA’s <code class="docutils literal notranslate"><span class="pre">dep_graph</span></code> can now be used to track dependencies between temporaries, constants, guard conditions, and function calls - if you want it!</p></li>
+<li><p>(#2929) Basic support for structs with bitfields in SimType</p></li>
+<li><p>There’s a decompiler now</p></li>
+</ul>
+</section>
+<section id="bisa-9-0">
+<h2>bisa 9.0<a class="headerlink" href="#bisa-9-0" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Switched to a new versioning scheme: major.minor.build_id</p></li>
+</ul>
+</section>
+<section id="bisa-8-19-7-25">
+<h2>bisa 8.19.7.25<a class="headerlink" href="#bisa-8-19-7-25" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>(#1503) Implement necessary helpers and information storage for call pretty printing</p></li>
+<li><p>(#1546) Add a new state option MEMORY_FIND_STRICT_SIZE_LIMIT</p></li>
+<li><p>(#1548) SimProcedure.static_exits: Allow providing name hints</p></li>
+<li><p>(cle#177) Use Enums for Symbol Types</p></li>
+<li><p>(cle#193) Add support for “named regions”</p></li>
+<li><p>(claripy#151) Implement operator precedence in claripy op rendering</p></li>
+<li><p>Added support for interaction recording in bisa-management</p></li>
+<li><p>Several new simprocedure implementations</p></li>
+<li><p>Substantial imporvments to our CFG</p></li>
+</ul>
+</section>
+<section id="bisa-8-19-4-5">
+<h2>bisa 8.19.4.5<a class="headerlink" href="#bisa-8-19-4-5" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>(#1234) Massive improvements to CFG recovery for ARM and ARM cortex-m binaries.</p></li>
+<li><p>(#1416) Added support for analyzing Java programs via the Soot IR, including the ability to analyze interplay between Java code and JNI libraries. This branch was two years old!</p></li>
+<li><p>(#1427) Added a MemoryWatcher exploration technique to take action when the system is running out of RAM. Thanks &#64;bannsec.</p></li>
+<li><p>(#1432) Added a <code class="docutils literal notranslate"><span class="pre">state.heap</span></code> plugin which manages the heap (with pluggable heap schemes!) and provides malloc functionality. Thanks &#64;tgduckworth.</p></li>
+<li><p>Speed improvements for using the VEX engine and working with concrete data.</p></li>
+<li><p>Added SimLightRegisters, an alternate registers plugin that eliminates the abstraction of the register file for performance improvements at the cost of removing all instrumentability.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">version__</span></code> variable has been added to all modules.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">stack_base</span></code> kwarg for <code class="docutils literal notranslate"><span class="pre">call_state</span></code> is not broken for the first time ever</p></li>
+<li><p><a class="reference external" href="https://github.com/python/cpython/pull/11384">https://github.com/python/cpython/pull/11384</a></p></li>
+</ul>
+</section>
+<section id="bisa-8-19-2-4">
+<h2>bisa 8.19.2.4<a class="headerlink" href="#bisa-8-19-2-4" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>(#1279) Support C++ function name demangling via itanium-demangler. Thanks &#64;fmagin.</p></li>
+<li><p>(#1283) <code class="docutils literal notranslate"><span class="pre">security_cookie</span></code> is initialized for SimWindows. Thanks &#64;zeroSteiner.</p></li>
+<li><p>(#1298) Introduce <code class="docutils literal notranslate"><span class="pre">SimData</span></code>. It’s a cleaner interface to deal with data imports in CLE – especially for those data entries that are not imported because of missing or unloaded libraries. This commit fixes long-standing issues #151 and #693.</p></li>
+<li><p>(#1299, #1300, #1301, #1313, #1314, #1315, #1336, #1337, #1343, …) Multiple CFGFast-related improvements and bug fixes.</p></li>
+<li><p>(#1332) <code class="docutils literal notranslate"><span class="pre">UnresolvableTarget</span></code> is now split into two classes: <code class="docutils literal notranslate"><span class="pre">UnresolvableJumpTarget</span></code> and <code class="docutils literal notranslate"><span class="pre">UnresolvableCallTarget</span></code>. Thanks &#64;Kyle-Kyle.</p></li>
+<li><p>(#1382) Add a preliminary implementation of bisa decompiler. Give it a try! <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">bisa.Project(&quot;cfg_loop_unrolling&quot;,</span> <span class="pre">auto_load_libs=False);</span> <span class="pre">p.analyses.CFG();</span> <span class="pre">print(p.analyses.Decompiler(p.kb.functions['test_func']).codegen.text)</span></code>.</p></li>
+<li><p>(#1421) <code class="docutils literal notranslate"><span class="pre">SimAction</span></code>s now have incrementing IDs. Thanks &#64;bannsec.</p></li>
+<li><p>(#1408) <code class="docutils literal notranslate"><span class="pre">ANA</span></code>, bisa’s old identity-aware serialization backend, has been removed. Instead of non-obvious serialization behavior, all bisa objects should now be pickleable. If one is not, please file an issue. For use-cases that require identity-awareness (i.e., deduplicating ASTs across states serialized at different times), an <code class="docutils literal notranslate"><span class="pre">bisa.vaults</span></code> module has been introduced.</p></li>
+<li><p>Added a <a class="reference external" href="http://bisa.io/blog/bisa_symbion/">facility to synchronize state between bisa and a running target a la avatar2</a></p></li>
+<li><p>Changed unconstrained registers/memory warning to be less obnoxious and contain useful information. Also added <code class="docutils literal notranslate"><span class="pre">SYMBOL_FILL_UNCONSTRAINED_REGISTERS</span></code> and <code class="docutils literal notranslate"><span class="pre">SYMBOL_FILL_UNCONSTRAINED_MEMORY</span></code> state options to silence them.</p></li>
+</ul>
+</section>
+<section id="bisa-8-18-10-25">
+<h2>bisa 8.18.10.25<a class="headerlink" href="#bisa-8-18-10-25" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>The IDA backend for CLE has been removed. It has been broken for quite some time, but now it has been disabled for your own safety.</p></li>
+<li><p>Surveyors have been removed! Finally! This is thanks to &#64;danse-macabre who contributed an Exploration Technique for the Slicecutor. Backwards slicing has now been brought out of the bisa dark ages.</p></li>
+<li><p>SimCC can now be initialized with a string containing C function prototype in its <code class="docutils literal notranslate"><span class="pre">func_ty</span></code> argument</p></li>
+<li><p>Similarly, Callable can now be run with its arguments instantiated from a string containing C expressions</p></li>
+<li><p>Tracer has been substantially refactored - it will now handle more kinds of desyncs, ASLR slides, and is much more friendly for hacking. We will be continuing to improve it!</p></li>
+<li><p>The Oppologist and Driller have been refactored to play nice with other exploration techniques</p></li>
+<li><p>SimProcedure continuations now have symbols in the externs object, so <code class="docutils literal notranslate"><span class="pre">describe_addr</span></code> will work on them. Additionally, the representation for SimProcedure (appearing in <code class="docutils literal notranslate"><span class="pre">history.descriptions</span></code> and <code class="docutils literal notranslate"><span class="pre">project._sim_procedures</span></code> among other places) has been improved to show this information.</p></li>
+</ul>
+</section>
+<section id="bisa-8-18-10-5">
+<h2>bisa 8.18.10.5<a class="headerlink" href="#bisa-8-18-10-5" title="Link to this heading">¶</a></h2>
+<p>Largely a bugfix release, but with a few bonus treats:</p>
+<ul class="simple">
+<li><p>API documentation has been rewritten for Exploration Technique. It should be much easier to use now.</p></li>
+<li><p>Simulation Manager will throw an error if you pass incorrect keyword arguments (??? why was it like this)</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">save_unconstrained</span></code> flag of Simulation Manager is now on by default</p></li>
+<li><p>If a step produces only unsatisfiable states, they will appear in the <code class="docutils literal notranslate"><span class="pre">'unsat'</span></code> stash regardless of the <code class="docutils literal notranslate"><span class="pre">save_unsat</span></code> setting, since this usually indicates a bug. Add <code class="docutils literal notranslate"><span class="pre">unsat</span></code> to the <code class="docutils literal notranslate"><span class="pre">auto_drop</span></code> parameter to restore the old behavior.</p></li>
+</ul>
+</section>
+<section id="bisa-8-18-10-1">
+<h2>bisa 8.18.10.1<a class="headerlink" href="#bisa-8-18-10-1" title="Link to this heading">¶</a></h2>
+<p>Welcome to bisa 8!
+The biggest change for this major version bump is the transition to Python 3.
+You can read about this, as well as a few other breaking changes, in the <a class="reference internal" href="migration-8.html#migrating-to-bisa-8"><span class="std std-ref">Migrating to bisa 8</span></a>.</p>
+<ul class="simple">
+<li><p>Switch to Python 3</p></li>
+<li><p>Refactor to Clemory to clean up the API and speed things up drastically</p></li>
+<li><p>Remove <code class="docutils literal notranslate"><span class="pre">object.symbols_by_addr</span></code> (dict) and add <code class="docutils literal notranslate"><span class="pre">object.symbols</span></code> (sorted list); add <code class="docutils literal notranslate"><span class="pre">fuzzy</span></code> parameter to <code class="docutils literal notranslate"><span class="pre">loader.find_symbol</span></code></p></li>
+<li><p>CFGFast is much, much faster now. CFGAccurate has been renamed to CFGEmulated.</p></li>
+<li><p>Support for avx2 unpack instructions, courtesy of D. J. Bernstein</p></li>
+<li><p>Removed support for immutable simulation managers</p></li>
+<li><p>bisa will now show you a warning when using uninitialized memory or registers</p></li>
+<li><p>bisa will now NOT show you a warning if you have a capstone 3.x install unless you’re actually interacting with the relevant missing parts</p></li>
+<li><p>Many, many, many bug fixes</p></li>
+</ul>
+</section>
+<section id="bisa-7-8-7-1">
+<h2>bisa 7.8.7.1<a class="headerlink" href="#bisa-7-8-7-1" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Remove <code class="docutils literal notranslate"><span class="pre">LoopLimiter</span></code> and <code class="docutils literal notranslate"><span class="pre">DFG</span></code>.</p></li>
+<li><p>(#1063) <code class="docutils literal notranslate"><span class="pre">CFGAccurate</span></code> can now leverage indirect jump resolvers to resolve indirect jumps.</p></li>
+</ul>
+</section>
+<section id="bisa-7-8-6-23">
+<h2>bisa 7.8.6.23<a class="headerlink" href="#bisa-7-8-6-23" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>(PyVEX!#134) We now recognize LDMDB r11, {xxx, pc} as a ret instruction for ARM.</p></li>
+<li><p>(#1053) CFGFast spends less time running next_pos_with_sort_not_in(), thus it runs faster on large binaries.</p></li>
+<li><p>(#1080) Jump table resolvers now support resolving ARM jump tables.</p></li>
+<li><p>(#1081, together with the PyVEX commit 61efbdcf6303a936aa3de35011d2d1e3fe5fdea5) The memory footprint of CFGFast is noticeably smaller, especially on large binaries (over 10 MB in size).</p></li>
+<li><p>(#1034) Concretizing a SimFile with unconstrained size can no longer run you out of memory.</p></li>
+<li><p>Other minor changes and bug fixes.</p></li>
+</ul>
+</section>
+<section id="bisa-7-8-6-16">
+<h2>bisa 7.8.6.16<a class="headerlink" href="#bisa-7-8-6-16" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>The modeling of file system is refactored.</p></li>
+<li><p>(#808) Add a new class Control flow blanket (CFBlanket) to support generating a linear view of a control flow graph.</p></li>
+<li><p>(#863) Add support to AIL, the new bisa intermediate language (still pretty WIP though). Merged in several static analyses (reaching definition analysis, VEX-to-AIL translation, redundant assignment elimination, code region identification, control flow structuring, etc.) that support the development of decompilation in the near future.</p></li>
+<li><p>(#888) SimulationManager is extensively refactored and cleaned up.</p></li>
+<li><p>(#892) Keystone is integrated. You can assemble instructions inside bisa now.</p></li>
+<li><p>(#897) A new class <code class="docutils literal notranslate"><span class="pre">PluginHub</span></code> is added. Plugins (analyses, engines) are refactored to be based on <code class="docutils literal notranslate"><span class="pre">PluginHub</span></code>.</p></li>
+<li><p>(#899) Support of bidirectional mapping between syscall numbers and syscalls.</p></li>
+<li><p>(#925, #941, #942) A bunch of library function prototypes (including glibc) are added to bisa.</p></li>
+<li><p>(#953) Fix the issue where evaluating the jump target of a jump table that contains many entries (e.g., &gt; 512) is extremely slow.</p></li>
+<li><p>(#964) State options are now stored in insances of SimStateOptions. <code class="docutils literal notranslate"><span class="pre">state.options</span></code> is no longer a set of strings.</p></li>
+<li><p>(#973) Add two new exploration techniques: Stochastic and unique.</p></li>
+<li><p>(#996) SimType structs are now much easier to use.</p></li>
+<li><p>(#998) Add a new state option <code class="docutils literal notranslate"><span class="pre">PRODUCE_ZERODIV_SUCCESSORS</span></code> to generate divide-by-zero successors.</p></li>
+<li><p>Speed improvements and bug fixes in CFG generation (CFGFast and CFGAccurate).</p></li>
+</ul>
+</section>
+<section id="bisa-7-8-2-21">
+<h2>bisa 7.8.2.21<a class="headerlink" href="#bisa-7-8-2-21" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Refactor of how syscall handling and SimSyscallLibrary work - it is now possible to handle syscalls using multiple ABIs in the same process</p></li>
+<li><p>Added syscall name-number mappings from all linux ABIs, parsed from gdb</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">ManualMergepoint</span></code> exploration technique for when veritesting is too mysterious for your tastes</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">LoopSeer</span></code> exploration technique for managing loops during symbolic exploration (credit &#64;tyb0807)</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">ProxyTechnique</span></code> exploration technique for easily composing simple lambda-based instrumentations (credit &#64;danse-macabre)</p></li>
+</ul>
+</section>
+<section id="bisa-7-7-12-16">
+<h2>bisa 7.7.12.16<a class="headerlink" href="#bisa-7-7-12-16" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>You can now tell where the variables implicitly created by bisa come from! <code class="docutils literal notranslate"><span class="pre">state.solver.BVS</span></code> now can take a <code class="docutils literal notranslate"><span class="pre">key</span></code> parameter, which describes its meaning in relation to the emulated environment. You can then use <code class="docutils literal notranslate"><span class="pre">state.solver.get_variables(...)</span></code> and <code class="docutils literal notranslate"><span class="pre">state.solver.describe_variables(...)</span></code> to map tags and ASTs to and from each other. Check out the <a class="reference external" href="http://bisa.io/api-doc/bisa.html#bisa.state_plugins.solver.SimSolver">API docs</a>!</p></li>
+<li><p>The SimOS for a project is now a public property - <code class="docutils literal notranslate"><span class="pre">project.simos</span></code> instead of <code class="docutils literal notranslate"><span class="pre">project._simos</span></code>. Additionally, the SimOS code structure has been shuffled around a bit - it’s now a subpackage instead of a submodule.</p></li>
+<li><p>The core components of Tracer and Driller have been refactored into Exploration Techniques and integrated into bisa proper, so you can now follow instruction traces without installing another repository! (credit &#64;tyb0807)</p></li>
+<li><p>Archinfo now contains a <code class="docutils literal notranslate"><span class="pre">byte_width</span></code> parameter and bisa supports emulation of platforms with non-octet bytes, lord help us</p></li>
+<li><p>Upgraded to networkx 2 (credit &#64;tyb0807)</p></li>
+<li><p>Hopefully installation issues with capstone should be fixed FOREVER</p></li>
+<li><p>Minor fixes to gender</p></li>
+</ul>
+</section>
+<section id="bisa-7-7-9-8">
+<h2>bisa 7.7.9.8<a class="headerlink" href="#bisa-7-7-9-8" title="Link to this heading">¶</a></h2>
+<p>Welcome to bisa 7!
+We worked long and hard all summer to make this release the best ever.
+It introduces several breaking changes, so for a quick guide on the most common ways you’ll need to update your scripts, take a look at the <a class="reference internal" href="migration-7.html#migrating-to-bisa-7"><span class="std std-ref">Migrating to bisa 7</span></a>.</p>
+<ul class="simple">
+<li><p>SimuVEX has been removed and its components have been integrated into bisa</p></li>
+<li><p>Path has been removed and its components have been integrated into SimState, notably the new <code class="docutils literal notranslate"><span class="pre">history</span></code> state plugin</p></li>
+<li><p>PathGroup has been renamed to SimulationManager</p></li>
+<li><p>SimState and SimProcedure now have a reference to their parent Project, though it is verboten to use it in anything other than an append-only fashion</p></li>
+<li><p>A new class SimLibrary is used to track SimProcedure and metadata corresponding to an individual shared library</p></li>
+<li><p>Several CLE interfaces have been refactored up for consistency</p></li>
+<li><p>Hook has been removed. Hooking is now done with individual SimProcedure instances, which are shallow-copied at execution time for thread-safety.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">state.solver</span></code> interface has been cleaned up drastically</p></li>
+</ul>
+<p>These are the major refactor-y points.
+As for the improvements:</p>
+<ul class="simple">
+<li><p>Greatly improved support for analyzing 32 bit windows binaries (partial credit &#64;schieb)</p></li>
+<li><p>Unicorn will now stop for stop points and breakpoints in the middle of blocks (credit &#64;bennofs)</p></li>
+<li><p>The processor flags for a state can now be accessed through <code class="docutils literal notranslate"><span class="pre">state.regs.eflags</span></code> on x86 and <code class="docutils literal notranslate"><span class="pre">state.regs.flags</span></code> on ARM (partial credit &#64;tyb0807)</p></li>
+<li><p>Fledgling support for emulating exception handling. Currently the only implementation of this is support for Structured Exception Handling on Windows, see <code class="docutils literal notranslate"><span class="pre">bisa.SimOS.handle_exception</span></code> for details</p></li>
+<li><p>Fledgling support for runtime library loading by treating the CLE loader as an append-only interface, though only implemented for windows. See <code class="docutils literal notranslate"><span class="pre">cle.Loader.dynamic_load</span></code> and <code class="docutils literal notranslate"><span class="pre">bisa.procedures.win32.dynamic_loading</span></code> for details.</p></li>
+<li><p>The knowledge base has been refactored into a series of plugins similar to SimState (credit &#64;danse-macabre)</p></li>
+<li><p>The testcase-based function identifier we wrote for CGC has been integrated into bisa as the Identifier analysis</p></li>
+<li><p>Improved support for writing custom VEX lifters</p></li>
+</ul>
+</section>
+<section id="bisa-6-7-6-9">
+<h2>bisa 6.7.6.9<a class="headerlink" href="#bisa-6-7-6-9" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>bisa: A static data-flow analysis framework has been introduced, and implemented as part of the <code class="docutils literal notranslate"><span class="pre">ForwardAnalysis</span></code> class. Additionally, a few exemplary data-flow analyses, like <code class="docutils literal notranslate"><span class="pre">VariableRecovery</span></code> and <code class="docutils literal notranslate"><span class="pre">VariableRecoveryFast</span></code>, have been implemented in bisa.</p></li>
+<li><p>bisa: We introduced the notion of <em>variable</em> to the bisa world. Now a VariableManager is available in the knowledge base. Variable information can be recovered by running a variable recovery analysis. Currently the variable information recovered for each function is still pretty coarse. More updates to it will arrive soon.</p></li>
+<li><p>bisa: Fix a bug in the topological sorting in <code class="docutils literal notranslate"><span class="pre">CFGUtils</span></code>, which resulted in suboptimal graph node ordering after sorting.</p></li>
+<li><p>SimuVEX: <code class="docutils literal notranslate"><span class="pre">LAZY_SOLVES</span></code> is no longer enabled by default during symbolic execution. It’s still there if it’s wanted, but it just caused confusion when on by default.</p></li>
+<li><p>SimuVEX: Thanks to &#64;ekilmer, a few new libc SimProcedures are added.</p></li>
+<li><p>SimuVEX: The default memory model has been refactored for expandability. Custom pages can now be created (derive the simuvex.storage.ListPage class) and used instead of the default page classes to implement custom memory behavior for specific pages. The user-friendly API for this is pending the next release.</p></li>
+<li><p>bisa-management: Implemented our own graph layout and edge routing algorithm. We do not rely on grandalf anymore.</p></li>
+<li><p>bisa-management: Added support for displaying variable information for operands.</p></li>
+<li><p>bisa-management: Added support for highlighting dependent operands when an operand is highlighted.</p></li>
+</ul>
+</section>
+<section id="bisa-6-7-3-26">
+<h2>bisa 6.7.3.26<a class="headerlink" href="#bisa-6-7-3-26" title="Link to this heading">¶</a></h2>
+<p>Building off of the engine changes from the last release, we have begun to extend bisa to other architectures. AVR and MSP430 are in progress. In the meantime, subwire has created a reference implementation of BrainFuck support in bisa, done two different ways! Check out <a class="reference external" href="https://github.com/bisa/bisa-platforms">bisa-platforms</a> for more info!</p>
+<ul class="simple">
+<li><p>We have rebased our fork of VEX on the latest master branch from Valgrind (as of 2 months ago, at least…). We have also submitted our patches to VEX to upstream, so we should be able to stop maintaining a fork pretty soon.</p></li>
+<li><p>The way we interact with VEX has changed substantially, and should speed things up a bit.</p></li>
+<li><p>Loading sets of binaries with many import symbols has been sped up</p></li>
+<li><p>Many, many improvements to bisa-management, including the switch away from enaml to using pyside directly.</p></li>
+</ul>
+</section>
+<section id="bisa-6-7-1-13">
+<h2>bisa 6.7.1.13<a class="headerlink" href="#bisa-6-7-1-13" title="Link to this heading">¶</a></h2>
+<p>For the last month, we have been working on a major refactor of the bisa to change the way that bisa reasons about the code that it analyzes.
+Until now, bisa has been bound to the VEX intermediate representation to lift native code, supporting a wide range of architectures but not being very expandable past them.
+This release represents the ground work for what we call translation and execution engines.
+These engines are independent backends, pluggable into the bisa framework, that will allow bisa to reason about a wide range of targets.
+For now, we have restructured the existing VEX and Unicorn Engine support into this engine paradigm, but as we discuss in <a class="reference external" href="http://bisa.io/blog/2017_01_10.html">our blog post</a>, the plan is to create engines to enable bisa’s reasoning of Java bytecode and source code, and to augment bisa’s environment support through the use of external dynamic sandboxes.</p>
+<p>For now, these changes are mostly internal.
+We have attempted to maintain compatibility for end-users, but those building systems atop bisa will have to adapt to the modern codebase.
+The following are the major changes:</p>
+<ul class="simple">
+<li><p>simuvex: we have introduced SimEngine. SimEngine is a base class for abstractions over native code. For example, bisa’s VEX-specific functionality is now concentrated in SimEngineVEX, and new engines (such as SimEngineLLVM) can be implemented (even outside of simuvex itself) to support the analysis of new types of code.</p></li>
+<li><p>simuvex: as part of the engines refactor, the SimRun class has been eliminated. Instead of different subclasses of SimRun that would be instantiated from an input state, engines each have a <code class="docutils literal notranslate"><span class="pre">process</span></code> function that, from an input state, produces a SimSuccessors instance containing lists of different successor states (normal, unsat, unconstrained, etc) and any engine-specific artifacts (such as the VEX statements. Take a look at <code class="docutils literal notranslate"><span class="pre">successors.artifacts</span></code>).</p></li>
+<li><p>simuvex: <code class="docutils literal notranslate"><span class="pre">state.mem[x:]</span> <span class="pre">=</span> <span class="pre">y</span></code> now <em>requires</em> a type for storage (for example <code class="docutils literal notranslate"><span class="pre">state.mem[x:].dword</span> <span class="pre">=</span> <span class="pre">y</span></code>).</p></li>
+<li><p>simuvex: the way of calling inline SimProcedures has been changed. Now you have to create a SimProcedure, and then call <code class="docutils literal notranslate"><span class="pre">execute()</span></code> on it and pass in a program state as well as the arguments.</p></li>
+<li><p>simuvex: accessing registers through <code class="docutils literal notranslate"><span class="pre">SimRegNameView</span></code> (like <code class="docutils literal notranslate"><span class="pre">state.regs.eax</span></code>) always triggers SimInspect breakpoints and creates new actions. Now you can access a register by prefixing its name with an underscore (e.g. <code class="docutils literal notranslate"><span class="pre">state.regs._eax</span></code> or <code class="docutils literal notranslate"><span class="pre">state._ip</span></code>) to avoid triggering breakpoints or creating actions.</p></li>
+<li><p>bisa: the way hooks work has slightly changed, though is backwards-compatible. The new bisa.Hook class acts as a wrapper for hooks (SimProcedures and functions), keeping things cleaner in the <code class="docutils literal notranslate"><span class="pre">project._sim_procedures</span></code> dict.</p></li>
+<li><p>bisa: we have deprecated the keyword argument <code class="docutils literal notranslate"><span class="pre">max_size</span></code> and changed it to to <code class="docutils literal notranslate"><span class="pre">size</span></code> in the <code class="docutils literal notranslate"><span class="pre">bisa.Block</span></code> constructor (i.e., the argument to <code class="docutils literal notranslate"><span class="pre">project.factory.block</span></code> and more upstream methods (<code class="docutils literal notranslate"><span class="pre">path.step</span></code>, <code class="docutils literal notranslate"><span class="pre">path_group.step</span></code>, etc).</p></li>
+<li><p>bisa: we have deprecated <code class="docutils literal notranslate"><span class="pre">project.factory.sim_run</span></code> and changed it to to <code class="docutils literal notranslate"><span class="pre">project.factory.successors</span></code>, and it now generates a <code class="docutils literal notranslate"><span class="pre">SimSuccessors</span></code> object.</p></li>
+<li><p>bisa: <code class="docutils literal notranslate"><span class="pre">project.factory.sim_block</span></code> has been deprecated and replaced with <code class="docutils literal notranslate"><span class="pre">project.factory.successors(default_engine=True)</span></code>.</p></li>
+<li><p>bisa: bisa syscalls are no longer hooks. Instead, the syscall table is now in <code class="docutils literal notranslate"><span class="pre">project._simos.syscall_table</span></code>. This will be made “public” after a usability refactor. If you were using <code class="docutils literal notranslate"><span class="pre">project.is_hooked(addr)</span></code> to see if an address has a related SimProcedure, now you probably want to check if there is a related syscall as well (using <code class="docutils literal notranslate"><span class="pre">project._simos.syscall_table.get_by_addr(addr)</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">None</span></code>).</p></li>
+<li><p>pyvex: to support custom lifters to VEX, pyvex has introduced the concept of backend lifters. Lifters can be written in pure Python to produce VEX IR, allowing for extendability of bisa’s VEX-based analyses to other hardware architectures.</p></li>
+</ul>
+<p>As usual, there are many other improvements and minor bugfixes.</p>
+<ul class="simple">
+<li><p>claripy: support <code class="docutils literal notranslate"><span class="pre">unsat_core()</span></code> to get the core of unsatness of constraints. It is in fact a thin wrapper of the <code class="docutils literal notranslate"><span class="pre">unsat_core()</span></code> function provided by Z3. Also a new state option <code class="docutils literal notranslate"><span class="pre">CONSTRAINT_TRACKING_IN_SOLVER</span></code> is added to SimuVEX. That state option must be enabled if you want to use <code class="docutils literal notranslate"><span class="pre">unsat_core()</span></code> on any state.</p></li>
+<li><p>simuvex: <code class="docutils literal notranslate"><span class="pre">SimMemory.load()</span></code> and <code class="docutils literal notranslate"><span class="pre">SimMemory.store()</span></code> now takes a new parameter <code class="docutils literal notranslate"><span class="pre">disable_actions</span></code>. Setting it to True will prevent any SimAction creation.</p></li>
+<li><p>bisa: CFGFast has a better support for ARM binaries, especially for code in THUMB mode.</p></li>
+<li><p>bisa: thanks to an improvement in SimuVEX, CFGAccurate now uses slightly less memory than before.</p></li>
+<li><p>bisa: <code class="docutils literal notranslate"><span class="pre">len()</span></code> on path <code class="docutils literal notranslate"><span class="pre">trace</span></code> or <code class="docutils literal notranslate"><span class="pre">addr_trace</span></code> is made much faster.</p></li>
+<li><p>bisa: Fix a crash during CFG generation or symbolic execution on platforms/architectures with no syscall defined.</p></li>
+<li><p>bisa: as part of the refactor, <code class="docutils literal notranslate"><span class="pre">BackwardSlicing</span></code> is temporarily disabled. It will be re-enabled once all DDG-related refactor are merged to master.</p></li>
+</ul>
+<p>Additionally, packaging and build-system improvements coordinated between the bisa and Unicorn Engine projects have allowed bisa’s Unicorn support to be built on Windows. Because of this, <code class="docutils literal notranslate"><span class="pre">unicorn</span></code> is now a dependency for <code class="docutils literal notranslate"><span class="pre">simuvex</span></code>.</p>
+<p>Looking forward, bisa is poised to become a program analysis engine for binaries <em>and more</em>!</p>
+</section>
+<section id="bisa-5-6-12-3">
+<h2>bisa 5.6.12.3<a class="headerlink" href="#bisa-5-6-12-3" title="Link to this heading">¶</a></h2>
+<p>It has been over a month since the last release 5.6.10.12.
+Again, we’ve made some significant changes and improvements on the code base.</p>
+<ul class="simple">
+<li><p>bisa: Labels are now stored in KnowledgeBase.</p></li>
+<li><p>bisa: Add a new analysis: <code class="docutils literal notranslate"><span class="pre">Disassembly</span></code>.
+The new Disassembly analysis provides an easy-to-use interface to render assembly of functions.</p></li>
+<li><p>bisa: Fix the issue that <code class="docutils literal notranslate"><span class="pre">ForwardAnalysis</span></code> may prematurely terminate while there are still un-processed jobs.</p></li>
+<li><p>bisa: Many small improvements and bug fixes on <code class="docutils literal notranslate"><span class="pre">CFGFast</span></code>.</p></li>
+<li><p>bisa: Many small improvements and bug fixes on <code class="docutils literal notranslate"><span class="pre">VFG</span></code>.
+Bring back widening support.
+Fix the issue that <code class="docutils literal notranslate"><span class="pre">VFG</span></code> may not terminate under certain cases.
+Implement a new graph traversal algorithm to have an optimal traversal order.
+Allow state merging at non-merge-points, which allows faster convergence.</p></li>
+<li><p>bisa-management: Display a progress during initial CFG recovery.</p></li>
+<li><p>bisa-management: Display a “Load binary” window upon binary loading.
+Some analysis options can be adjusted there.</p></li>
+<li><p>bisa-management: Disassembly view: Edge routing on the graph is improved.</p></li>
+<li><p>bisa-management: Disassembly view: Support starting a new symbolic execution task from an arbitrary address in the program.</p></li>
+<li><p>bisa-management: Disassembly view: Support renaming of function names and labels.</p></li>
+<li><p>bisa-management: Disassembly view: Support “Jump to address”.</p></li>
+<li><p>bisa-management: Disassembly view: Display resolved and unresolved jump targets.
+All jump targets are double-clickable.</p></li>
+<li><p>SimuVEX: Move region mapping from <code class="docutils literal notranslate"><span class="pre">SimAbstractMemory</span></code> to <code class="docutils literal notranslate"><span class="pre">SimMemory</span></code>.
+This will allow an easier conversion between <code class="docutils literal notranslate"><span class="pre">SimAbstractMemory</span></code> and <code class="docutils literal notranslate"><span class="pre">SimSymbolicMemory</span></code>, which is to say, conversion between symbolic states and static states is now possible.</p></li>
+<li><p>SimuVEX &amp; claripy: Provide support for <code class="docutils literal notranslate"><span class="pre">unsat_core</span></code> in Z3.
+It returns a set of constraints that led to unsatness of the constraint set on the current state.</p></li>
+<li><p>archinfo: Add a new Boolean variable <code class="docutils literal notranslate"><span class="pre">branch_delay_slot</span></code> for each architecture.
+It is set to True on MIPS32.</p></li>
+</ul>
+</section>
+<section id="bisa-5-6-8-22">
+<h2>bisa 5.6.8.22<a class="headerlink" href="#bisa-5-6-8-22" title="Link to this heading">¶</a></h2>
+<p>Major point release! An incredible number of things have changed in the month run-up to the Cyber Grand Challenge.</p>
+<ul class="simple">
+<li><p>Integration with <a class="reference external" href="https://github.com/unicorn-engine/unicorn">Unicorn Engine</a> supported for concrete execution.
+A new SimRun type, SimUnicorn, may step through many basic blocks at once, so long as there is no operation on symbolic data.
+Please use <a class="reference external" href="https://github.com/bisa/unicorn">our fork of unicorn engine</a>, which has many patches applied.
+All these patches are pending merge into upstream.</p></li>
+<li><p>Lots of improvements and bug fixes to CFGFast.
+Rumors are bisa’s CFG was only “optimized” for x86-64 binaries (which is really because most of our test cases are compiled as 64-bit ELFs).
+Now it is also “optimized” for x86 binaries :)
+(editor’s note: bisa is built with cross-architecture analysis in mind. CFG construction is pretty much the only component which has architecture-specific behavior.)</p></li>
+<li><p>Lots of improvements to the VFG analysis, including speed and accuracy. However, there is still a lot to be done.</p></li>
+<li><p>Lots of speed optimizations in general - CFGFast should be 3-6x faster under CPython with much less memory usage.</p></li>
+<li><p>Now data dependence graph gives you a real dependence graph between variable definitions. Try <code class="docutils literal notranslate"><span class="pre">data_graph</span></code> and <code class="docutils literal notranslate"><span class="pre">simplified_data_graph</span></code> on a DDG object!</p></li>
+<li><p>New state option <code class="docutils literal notranslate"><span class="pre">simuvex.o.STRICT_PAGE_ACCESS</span></code> will cause a <code class="docutils literal notranslate"><span class="pre">SimSegfaultError</span></code> to be raised whenever the guest reads/writes/executes memory that is either unmapped or doesn’t have the appropriate permissions.</p></li>
+<li><p>Merging of paths (as opposed to states) is performed in a much smarter way.</p></li>
+<li><p>The behavior of the <code class="docutils literal notranslate"><span class="pre">support_selfmodifying_code</span></code> project option is changed:
+Before, this would allow the state to be used as a fallback source of instruction bytes when no backer from CLE is available.
+Now, this option makes instruction lifting use the state as the source of bytes always.
+When the option is disabled and execution jumps outside the normal binary, the state will be used automatically.</p></li>
+<li><p><em>Actually</em> support self-modifying code - if a basic block of code modifies itself, the block will be re-lifted before the next instruction starts.</p></li>
+<li><p>Syscalls are handled differently now - Before you would see a SimRun for a syscall helper, now you’ll just see a SimProcedure for the given syscall.
+Additionally, each syscall has its own address in a “syscalls segment”, and syscalls are treated as jumps to this segment.
+This simplifies a lot of things analysis-wise.</p></li>
+<li><p>CFGAccurate accepts a <code class="docutils literal notranslate"><span class="pre">base_graph</span></code> keyword to its constructor, e.g. <code class="docutils literal notranslate"><span class="pre">CFGFast().graph</span></code>, or even <code class="docutils literal notranslate"><span class="pre">.graph</span></code> of a function, to use as a base for analysis.</p></li>
+<li><p>New fast memory model for cases where symbolic-addressed reads and writes are unlikely.</p></li>
+<li><p>Conflicts between the <code class="docutils literal notranslate"><span class="pre">find</span></code> and <code class="docutils literal notranslate"><span class="pre">avoid</span></code> parameters to the Explorer otiegnqwvk are resolved correctly. (credit clslgrnc)</p></li>
+<li><p>New analysis <code class="docutils literal notranslate"><span class="pre">StaticHooker</span></code> which hooks library functions in unstripped statically linked binaries.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Lifter</span></code> can be used without creating an bisa Project.
+You must manually specify the architecture and bytestring in calls to <code class="docutils literal notranslate"><span class="pre">.lift()</span></code> and <code class="docutils literal notranslate"><span class="pre">.fresh_block()</span></code>.
+If you like, you can also specify the architecture as a parameter to the constructor and omit it from the lifting calls.</p></li>
+<li><p>Add two new analyses developed for the CGC (mostly as examples of doing static analysis with bisa): Reassembler and BinaryOptimizer.</p></li>
+</ul>
+</section>
+<section id="bisa-4-6-6-28">
+<h2>bisa 4.6.6.28<a class="headerlink" href="#bisa-4-6-6-28" title="Link to this heading">¶</a></h2>
+<p>In general, there have been enormous amounts of speed improvements in this release.
+Depending on the workload, bisa should run about twice as fast.
+Aside from this, there have also been many submodule-specific changes:</p>
+<section id="bisa">
+<h3>bisa<a class="headerlink" href="#bisa" title="Link to this heading">¶</a></h3>
+<p>Quite a few changes and improvements are made to <code class="docutils literal notranslate"><span class="pre">CFGFast</span></code> and <code class="docutils literal notranslate"><span class="pre">CFGAccurate</span></code> in order to have better and faster CFG recovery.
+The two biggest changes in <code class="docutils literal notranslate"><span class="pre">CFGFast</span></code> are jump table resolution and data references collection, respectively.
+Now <code class="docutils literal notranslate"><span class="pre">CFGFast</span></code> resolves indirect jumps by default.
+You may get a list of indirect jumps recovered in <code class="docutils literal notranslate"><span class="pre">CFGFast</span></code> by accessing the <code class="docutils literal notranslate"><span class="pre">indirect_jumps</span></code> attribute.
+For many cases, it resolves the jump table accurately.
+Data references collection is still in alpha mode.
+To test data references collection, just pass <code class="docutils literal notranslate"><span class="pre">collect_data_references=True</span></code> when creating a fast CFG, and access the <code class="docutils literal notranslate"><span class="pre">memory_data</span></code> attribute after the CFG is constructed.</p>
+<p>CFG recovery on ARM binaries is also improved.</p>
+<p>A new paradigm called an “otiegnqwvk”, or an “exploration technique”, allows the packaging of special logic related to path group stepping.</p>
+</section>
+<section id="simuvex">
+<h3>SimuVEX<a class="headerlink" href="#simuvex" title="Link to this heading">¶</a></h3>
+<p>Reads/writes to the x87 fpu registers now work correctly - there is special logic that rotates a pointer into part of the register file to simulate the x87 stack.</p>
+<p>With the recent changes to Claripy, we have configured SimuVEX to use the composite solver by default.
+This should be transparent, but should be considered if strange issues (or differences in behavior) arise during symbolic execution.</p>
+</section>
+<section id="claripy">
+<h3>Claripy<a class="headerlink" href="#claripy" title="Link to this heading">¶</a></h3>
+<p>Fixed a bug in claripy where <code class="docutils literal notranslate"><span class="pre">div__</span></code> was not always doing unsigned division, and added new methods <code class="docutils literal notranslate"><span class="pre">SDiv</span></code> and <code class="docutils literal notranslate"><span class="pre">SMod</span></code> for signed division and signed remainder, respectively.</p>
+<p>Claripy frontends have been completely rewritten into a mixin-centric solver design. Basic frontend functionality (i.e., calling into the solver or dealing with backends) is handled by frontends (in <code class="docutils literal notranslate"><span class="pre">claripy.frontends</span></code>), and additional functionality (such as caching, deciding when to simplify, etc) is handled by frontend mixins (in <code class="docutils literal notranslate"><span class="pre">claripy.frontend_mixins</span></code>). This makes it considerably easier to customize solvers to your specific needE. For examples, look at <code class="docutils literal notranslate"><span class="pre">claripy/solver.py</span></code>.</p>
+<p>Alongside the solver rewrite, the composite solver (which splits constraints into independent constraint sets for faster solving) has been immensely improved and is now functional and fast.</p>
+</section>
+</section>
+<section id="bisa-4-6-6-4">
+<h2>bisa 4.6.6.4<a class="headerlink" href="#bisa-4-6-6-4" title="Link to this heading">¶</a></h2>
+<p>Syscalls are no longer handled by <code class="docutils literal notranslate"><span class="pre">simuvex.procedures.syscalls.handler</span></code>.
+Instead, syscalls are now handled by <code class="docutils literal notranslate"><span class="pre">bisa.SimOS.handle_syscall()</span></code>.
+Previously, the address of a syscall SimProcedure is the address right after the syscall instruction (e.g. <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">80h</span></code>), which collides with the real basic block starting at that address, and is very confusing.
+Now each syscall SimProcedure has its own address, just as a normal SimProcedure.
+To support this, there is another region mapped for the syscall addresses, <code class="docutils literal notranslate"><span class="pre">Project._syscall_obj</span></code>.</p>
+<p>Some refactoring and bug fixes in <code class="docutils literal notranslate"><span class="pre">CFGFast</span></code>.</p>
+<p>Claripy has been given the ability to handle <em>annotations</em> on ASTs.
+An annotation can be used to customize the behavior of some backends without impacting others.
+For more information, check the docstrings of <code class="docutils literal notranslate"><span class="pre">claripy.Annotation</span></code> and <code class="docutils literal notranslate"><span class="pre">claripy.Backend.apply_annotation</span></code>.</p>
+</section>
+<section id="bisa-4-6-5-25">
+<h2>bisa 4.6.5.25<a class="headerlink" href="#bisa-4-6-5-25" title="Link to this heading">¶</a></h2>
+<p>New state constructor - <code class="docutils literal notranslate"><span class="pre">call_state</span></code>. Comes with a refactor to <code class="docutils literal notranslate"><span class="pre">SimCC</span></code>, a refactor to <code class="docutils literal notranslate"><span class="pre">callable</span></code>, and the removal of <code class="docutils literal notranslate"><span class="pre">PathGroup.call</span></code>.
+All these changes are thoroughly documented, in <code class="docutils literal notranslate"><span class="pre">bisa/docs/advanced-topics/structured_data.md</span></code></p>
+<p>Refactor of <code class="docutils literal notranslate"><span class="pre">SimType</span></code> to make it easier to use types - they can be instantiated without a SimState and one can be added later.
+Comes with some usability improvements to SimMemView.
+Also, there’s a better wrapper around PyCParser for generating SimType instances from c declarations and definitions.
+Again, thoroughly documented, still in the structured data doc.</p>
+<p><code class="docutils literal notranslate"><span class="pre">CFG</span></code> is now an alias to <code class="docutils literal notranslate"><span class="pre">CFGFast</span></code> instead of <code class="docutils literal notranslate"><span class="pre">CFGAccurate</span></code>.
+In general, <code class="docutils literal notranslate"><span class="pre">CFGFast</span></code> should work under most cases, and it’s way faster than <code class="docutils literal notranslate"><span class="pre">CFGAccurate</span></code>.
+We believe such a change is necessary, and will make bisa more approachable to new users.
+You will have to change your code from <code class="docutils literal notranslate"><span class="pre">CFG</span></code> to <code class="docutils literal notranslate"><span class="pre">CFGAccurate</span></code> if you are relying on specific functionalities that only exist in <code class="docutils literal notranslate"><span class="pre">CFGAccurate</span></code>, for example, context-sensitivity and state-preserving.
+An exception will be raised by bisa if any parameter passed to <code class="docutils literal notranslate"><span class="pre">CFG</span></code> is only supported by <code class="docutils literal notranslate"><span class="pre">CFGAccurate</span></code>.
+For more detailed explanation, please take a look at the documentation of <code class="docutils literal notranslate"><span class="pre">bisa.analyses.CFG</span></code>.</p>
+</section>
+<section id="bisa-4-6-3-28">
+<h2>bisa 4.6.3.28<a class="headerlink" href="#bisa-4-6-3-28" title="Link to this heading">¶</a></h2>
+<p>PyVEX has a structural overhaul. The <code class="docutils literal notranslate"><span class="pre">IRExpr</span></code>, <code class="docutils literal notranslate"><span class="pre">IRStmt</span></code>, and <code class="docutils literal notranslate"><span class="pre">IRConst</span></code> modules no longer exist as submodules, and those module names are deprecated.
+Use <code class="docutils literal notranslate"><span class="pre">pyvex.expr</span></code>, <code class="docutils literal notranslate"><span class="pre">pyvex.stmt</span></code>, and <code class="docutils literal notranslate"><span class="pre">pyvex.const</span></code> if you need to access the members of those modules.</p>
+<p>The names of the first three parameters to <code class="docutils literal notranslate"><span class="pre">pyvex.IRSB</span></code> (the required ones) have been changed.
+If you were passing the positional args to IRSB as keyword args, consider switching to positional args.
+The order is <code class="docutils literal notranslate"><span class="pre">data</span></code>, <code class="docutils literal notranslate"><span class="pre">mem_addr</span></code>, <code class="docutils literal notranslate"><span class="pre">arch</span></code>.</p>
+<p>The optional parameter <code class="docutils literal notranslate"><span class="pre">sargc</span></code> to the <code class="docutils literal notranslate"><span class="pre">entry_state</span></code> and <code class="docutils literal notranslate"><span class="pre">full_init_state</span></code> constructors has been removed and replaced with an <code class="docutils literal notranslate"><span class="pre">argc</span></code> parameter.
+<code class="docutils literal notranslate"><span class="pre">sargc</span></code> predates being able to have claripy ASTs independent from a solver.
+The new system is to pass in the exact value, ast or integer, that you’d like to have as the guest program’s arg count.</p>
+<p>CLE and bisa can now accept file-like streams, that is, objects that support <code class="docutils literal notranslate"><span class="pre">stream.read()</span></code> and <code class="docutils literal notranslate"><span class="pre">stream.seek()</span></code> can be passed in wherever a filepath is expected.</p>
+<p>Documentation is much more complete, especially for PyVEX and bisa’s symbolic execution control components.</p>
+</section>
+<section id="bisa-4-6-3-15">
+<h2>bisa 4.6.3.15<a class="headerlink" href="#bisa-4-6-3-15" title="Link to this heading">¶</a></h2>
+<p>There have been several improvements to claripy that should be transparent to users:</p>
+<ul class="simple">
+<li><p>There’s been a refactoring of the VSA StridedInterval classes to fix cases where operations were not sound. Precision might suffer as a result, however.</p></li>
+<li><p>Some general speed improvements.</p></li>
+<li><p>We’ve introduced a new backend into claripy: the ReplacementBackend. This frontend generates replacement sets from constraints added to it, and uses these replacement sets to increase the precision of VSA. Additionally, we have introduced the HybridBackend, which combines this functionality with a constraint solver, allowing for memory index resolution using VSA.</p></li>
+</ul>
+<p>bisa itself has undergone some improvements, with API changes as a result:</p>
+<ul class="simple">
+<li><p>We are moving toward a new way to store information that bisa has recovered about a program: the knowledge base. When an analysis recovers some truth about a program (i.e., “there’s a basic block at 0x400400”, or “the block at 0x400400 has a jump to 0x400500”), it gets stored in a knowledge-base. Analysis that used to store data (currently, the CFG) now store them in a knowledge base and can <em>share</em> the global knowledge base of the project, now accessible via <code class="docutils literal notranslate"><span class="pre">project.kb</span></code>. Over time, this knowledge base will be expanded in the course of any analysis or symbolic execution, so bisa is constantly learning more information about the program it is analyzing.</p></li>
+<li><p>A forward data-flow analysis framework (called ForwardAnalysis) has been introduced, and the CFG was rewritten on top of it. The framework is still in alpha stage - expect more changes to be made. Documentation and more details will arrive shortly. The goal is to refactor other data-flow analysis, like CFGFast, VFG, DDG, etc. to use ForwardAnalysis.</p></li>
+<li><p>We refactored the CFG to a) improve code readability, and b) eliminate some bad designs that linger due to historical reasons.</p></li>
+</ul>
+</section>
+<section id="bisa-4-5-12">
+<h2>bisa 4.5.12.?<a class="headerlink" href="#bisa-4-5-12" title="Link to this heading">¶</a></h2>
+<p>Claripy has a new manager for backends, allowing external backends (i.e., those implemented by other modules) to be used.
+The result is that <code class="docutils literal notranslate"><span class="pre">claripy.backend_concrete</span></code> is now <code class="docutils literal notranslate"><span class="pre">claripy.backends.concrete</span></code>, <code class="docutils literal notranslate"><span class="pre">claripy.backend_vsa</span></code> is now <code class="docutils literal notranslate"><span class="pre">claripy.backends.vsa</span></code>, and so on.</p>
+</section>
+<section id="bisa-4-5-12-12">
+<h2>bisa 4.5.12.12<a class="headerlink" href="#bisa-4-5-12-12" title="Link to this heading">¶</a></h2>
+<p>Improved the ability to recover from failures in instruction decoding.
+You can now hook specific addresses at which VEX fails to decode with <code class="docutils literal notranslate"><span class="pre">project.hook</span></code>, even if those addresses are not the beginning of a basic block.</p>
+</section>
+<section id="bisa-4-5-11-23">
+<h2>bisa 4.5.11.23<a class="headerlink" href="#bisa-4-5-11-23" title="Link to this heading">¶</a></h2>
+<p>This is a pretty beefy release, with over half of claripy having been rewritten and major changes to other analyses.
+Internally, Claripy has been unified – the VSA mode and symbolic mode now work on the same structures instead of requiring structures to be created differently.
+This opens the door for awesome capabilities in the future, but could also result in unexpected behavior if we failed to account for something.</p>
+<p>Claripy has had some major interface changes:</p>
+<ul class="simple">
+<li><p>claripy.BV has been renamed to claripy.BVS (bit-vector symbol). It can now create bitvectors out of strings (i.e., claripy.BVS(0x41, 8) and claripy.BVS(“A”) are identical).</p></li>
+<li><p>state.BV and state.BVV are deprecated. Please use state.se.BVS and state.se.BVV.</p></li>
+<li><p>BV.model is deprecated. If you’re using it, you’re doing something wrong, anyways. If you really need a specific model, convert it with the appropriate backend (i.e., claripy.backend_concrete.convert(bv)).</p></li>
+</ul>
+<p>There have also been some changes to analyses:</p>
+<ul class="simple">
+<li><p>Interface: CFG argument <code class="docutils literal notranslate"><span class="pre">keep_input_state</span></code> has been renamed to <code class="docutils literal notranslate"><span class="pre">keep_state</span></code>. With this option enabled, both input and final states are kept.</p></li>
+<li><p>Interface: Two arguments <code class="docutils literal notranslate"><span class="pre">cfg_node</span></code> and <code class="docutils literal notranslate"><span class="pre">stmt_id</span></code> of <code class="docutils literal notranslate"><span class="pre">BackwardSlicing</span></code> have been deprecated. Instead, <code class="docutils literal notranslate"><span class="pre">BackwardSlicing</span></code> takes a single argument, <code class="docutils literal notranslate"><span class="pre">targets</span></code>. This means that we now support slicing from multiple sources.</p></li>
+<li><p>Performance: The speed of CFG recovery has been slightly improved. There is a noticeable speed improvement on MIPS binaries.</p></li>
+<li><p>Several bugs have been fixed in DDG, and some sanity checks were added to make it more usable.</p></li>
+</ul>
+<p>And some general changes to bisa itself:</p>
+<ul class="simple">
+<li><p>StringSpec is deprecated! You can now pass claripy bitvectors directly as arguments.</p></li>
+</ul>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">bisa</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core-concepts/index.html">Core Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyses/index.html">Build-in Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced-topics/index.html">Advanced Topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-bisa/index.html">Extending bisa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">bisa examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Appendix</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="cheatsheet.html">Cheatsheet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ops.html">List of Claripy Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="options.html">List of State Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="more-examples.html">CTF Challenge Examples</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Changelog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migration-9.1.html">Migrating to bisa 9.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migration-8.html">Migrating to bisa 8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migration-7.html">Migrating to bisa 7</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Appendix</a><ul>
+      <li>Previous: <a href="more-examples.html" title="previous chapter">CTF Challenge Examples</a></li>
+      <li>Next: <a href="migration-9.1.html" title="next chapter">Migrating to bisa 9.1</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, The bisa Project contributors.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/appendix/changelog.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

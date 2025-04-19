@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Machine State - memory, registers, and so on &#8212; bisa  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Simulation Managers" href="pathgroups.html" />
+    <link rel="prev" title="Symbolic Expressions and Constraint Solving" href="solver.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="machine-state-memory-registers-and-so-on">
+<h1>Machine State - memory, registers, and so on<a class="headerlink" href="#machine-state-memory-registers-and-so-on" title="Link to this heading">¶</a></h1>
+<p>So far, we’ve only used bisa’s simulated program states (<code class="docutils literal notranslate"><span class="pre">SimState</span></code> objects)
+in the barest possible way in order to demonstrate basic concepts about bisa’s
+operation. Here, you’ll learn about the structure of a state object and how to
+interact with it in a variety of useful ways.</p>
+<section id="review-reading-and-writing-memory-and-registers">
+<h2>Review: Reading and writing memory and registers<a class="headerlink" href="#review-reading-and-writing-memory-and-registers" title="Link to this heading">¶</a></h2>
+<p>If you’ve been reading this book in order (and you should be, at least for this
+first section), you already saw the basics of how to access memory and
+registers. <code class="docutils literal notranslate"><span class="pre">state.regs</span></code> provides read and write access to the registers
+through attributes with the names of each register, and <code class="docutils literal notranslate"><span class="pre">state.mem</span></code> provides
+typed read and write access to memory with index-access notation to specify the
+address followed by an attribute access to specify the type you would like to
+interpret the memory as.</p>
+<p>Additionally, you should now know how to work with ASTs, so you can now
+understand that any bitvector-typed AST can be stored in registers or memory.</p>
+<p>Here are some quick examples for copying and performing operations on data from
+the state:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">bisa</span><span class="o">,</span><span class="w"> </span><span class="nn">claripy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span> <span class="o">=</span> <span class="n">bisa</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="s1">&#39;/bin/true&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">entry_state</span><span class="p">()</span>
+
+<span class="go"># copy rsp to rbp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rbp</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rsp</span>
+
+<span class="go"># store rdx to memory at 0x1000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="mh">0x1000</span><span class="p">]</span><span class="o">.</span><span class="n">uint64_t</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rdx</span>
+
+<span class="go"># dereference rbp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rbp</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="n">state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rbp</span><span class="p">]</span><span class="o">.</span><span class="n">uint64_t</span><span class="o">.</span><span class="n">resolved</span>
+
+<span class="go"># add rax, qword ptr [rsp + 8]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rax</span> <span class="o">+=</span> <span class="n">state</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="n">state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rsp</span> <span class="o">+</span> <span class="mi">8</span><span class="p">]</span><span class="o">.</span><span class="n">uint64_t</span><span class="o">.</span><span class="n">resolved</span>
+</pre></div>
+</div>
+</section>
+<section id="basic-execution">
+<h2>Basic Execution<a class="headerlink" href="#basic-execution" title="Link to this heading">¶</a></h2>
+<p>Earlier, we showed how to use a Simulation Manager to do some basic execution.
+We’ll show off the full capabilities of the simulation manager in the next
+chapter, but for now we can use a much simpler interface to demonstrate how
+symbolic execution works: <code class="docutils literal notranslate"><span class="pre">state.step()</span></code>. This method will perform one step of
+symbolic execution and return an object called
+<a class="reference internal" href="../api.html#bisa.engines.successors.SimSuccessors" title="bisa.engines.successors.SimSuccessors"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisa.engines.successors.SimSuccessors</span></code></a>. Unlike normal emulation,
+symbolic execution can produce several successor states that can be classified
+in a number of ways. For now, what we care about is the <code class="docutils literal notranslate"><span class="pre">.successors</span></code> property
+of this object, which is a list containing all the “normal” successors of a
+given step.</p>
+<p>Why a list, instead of just a single successor state? Well, bisa’s process of
+symbolic execution is just the taking the operations of the individual
+instructions compiled into the program and performing them to mutate a SimState.
+When a line of code like <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">(x</span> <span class="pre">&gt;</span> <span class="pre">4)</span></code> is reached, what happens if x is a
+symbolic bitvector? Somewhere in the depths of bisa, the comparison <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&gt;</span> <span class="pre">4</span></code> is
+going to get performed, and the result is going to be <code class="docutils literal notranslate"><span class="pre">&lt;Bool</span> <span class="pre">x_32_1</span> <span class="pre">&gt;</span> <span class="pre">4&gt;</span></code>.</p>
+<p>That’s fine, but the next question is, do we take the “true” branch or the
+“false” one? The answer is, we take both! We generate two entirely separate
+successor states - one simulating the case where the condition was true and
+simulating the case where the condition was false. In the first state, we add
+<code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&gt;</span> <span class="pre">4</span></code> as a constraint, and in the second state, we add <code class="docutils literal notranslate"><span class="pre">!(x</span> <span class="pre">&gt;</span> <span class="pre">4)</span></code> as a
+constraint. That way, whenever we perform a constraint solve using either of
+these successor states, <em>the conditions on the state ensure that any solutions
+we get are valid inputs that will cause execution to follow the same path that
+the given state has followed.</em></p>
+<p>To demonstrate this, let’s use a <cite>fake firmware image
+&lt;../examples/fauxware/fauxware&gt;</cite> as an example. If you look at the <cite>source code
+&lt;../examples/fauxware/fauxware.c&gt;</cite> for this binary, you’ll see that the
+authentication mechanism for the firmware is backdoored; any username can be
+authenticated as an administrator with the password “SOSNEAKY”. Furthermore, the
+first comparison against user input that happens is the comparison against the
+backdoor, so if we step until we get more than one successor state, one of those
+states will contain conditions constraining the user input to be the backdoor
+password. The following snippet implements this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span> <span class="o">=</span> <span class="n">bisa</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="s1">&#39;examples/fauxware/fauxware&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">entry_state</span><span class="p">(</span><span class="n">stdin</span><span class="o">=</span><span class="n">bisa</span><span class="o">.</span><span class="n">SimFile</span><span class="p">)</span>  <span class="c1"># ignore that argument for now - we&#39;re disabling a more complicated default setup for the sake of education</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">succ</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">succ</span><span class="o">.</span><span class="n">successors</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="k">break</span>
+<span class="gp">... </span>    <span class="n">state</span> <span class="o">=</span> <span class="n">succ</span><span class="o">.</span><span class="n">successors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state1</span><span class="p">,</span> <span class="n">state2</span> <span class="o">=</span> <span class="n">succ</span><span class="o">.</span><span class="n">successors</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state1</span>
+<span class="go">&lt;SimState @ 0x400629&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state2</span>
+<span class="go">&lt;SimState @ 0x400699</span>
+</pre></div>
+</div>
+<p>Don’t look at the constraints on these states directly - the branch we just went
+through involves the result of <code class="docutils literal notranslate"><span class="pre">strcmp</span></code>, which is a tricky function to emulate
+symbolically, and the resulting constraints are <em>very</em> complicated.</p>
+<p>The program we emulated took data from standard input, which bisa treats as an
+infinite stream of symbolic data by default. To perform a constraint solve and
+get a possible value that input could have taken in order to satisfy the
+constraints, we’ll need to get a reference to the actual contents of stdin.
+We’ll go over how our file and input subsystems work later on this very page,
+but for now, just use <code class="docutils literal notranslate"><span class="pre">state.posix.stdin.load(0,</span> <span class="pre">state.posix.stdin.size)</span></code> to
+retrieve a bitvector representing all the content read from stdin so far.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">input_data</span> <span class="o">=</span> <span class="n">state1</span><span class="o">.</span><span class="n">posix</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">state1</span><span class="o">.</span><span class="n">posix</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state1</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="n">cast_to</span><span class="o">=</span><span class="nb">bytes</span><span class="p">)</span>
+<span class="go">b&#39;\x00\x00\x00\x00\x00\x00\x00\x00\x00SOSNEAKY\x00\x00\x00&#39;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state2</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="n">cast_to</span><span class="o">=</span><span class="nb">bytes</span><span class="p">)</span>
+<span class="go">b&#39;\x00\x00\x00\x00\x00\x00\x00\x00\x00S\x00\x80N\x00\x00 \x00\x00\x00\x00&#39;</span>
+</pre></div>
+</div>
+<p>As you can see, in order to go down the <code class="docutils literal notranslate"><span class="pre">state1</span></code> path, you must have given as
+a password the backdoor string “SOSNEAKY”. In order to go down the <code class="docutils literal notranslate"><span class="pre">state2</span></code>
+path, you must have given something <em>besides</em> “SOSNEAKY”. z3 has helpfully
+provided one of the billions of strings fitting this criteria.</p>
+<p>Fauxware was the first program bisa’s symbolic execution ever successfully
+worked on, back in 2013. By finding its backdoor using bisa you are
+participating in a grand tradition of having a bare-bones understanding of how
+to use symbolic execution to extract meaning from binaries!</p>
+</section>
+<section id="state-presets">
+<h2>State Presets<a class="headerlink" href="#state-presets" title="Link to this heading">¶</a></h2>
+<p>So far, whenever we’ve been working with a state, we’ve created it with
+<code class="docutils literal notranslate"><span class="pre">project.factory.entry_state()</span></code>. This is just one of several <em>state
+constructors</em> available on the project factory:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">.blank_state()</span></code> constructs a “blank slate” blank state, with most of its
+data left uninitialized. When accessing uninitialized data, an unconstrained
+symbolic value will be returned.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.entry_state()</span></code> constructs a state ready to execute at the main binary’s
+entry point.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.full_init_state()</span></code> constructs a state that is ready to execute through any
+initializers that need to be run before the main binary’s entry point, for
+example, shared library constructors or preinitializers. When it is finished
+with these it will jump to the entry point.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.call_state()</span></code> constructs a state ready to execute a given function.</p></li>
+</ul>
+<p>You can customize the state through several arguments to these constructors:</p>
+<ul class="simple">
+<li><p>All of these constructors can take an <code class="docutils literal notranslate"><span class="pre">addr</span></code> argument to specify the exact
+address to start.</p></li>
+<li><p>If you’re executing in an environment that can take command line arguments or
+an environment, you can pass a list of arguments through <code class="docutils literal notranslate"><span class="pre">args</span></code> and a
+dictionary of environment variables through <code class="docutils literal notranslate"><span class="pre">env</span></code> into <code class="docutils literal notranslate"><span class="pre">entry_state</span></code> and
+<code class="docutils literal notranslate"><span class="pre">full_init_state</span></code>. The values in these structures can be strings or
+bitvectors, and will be serialized into the state as the arguments and
+environment to the simulated execution. The default <code class="docutils literal notranslate"><span class="pre">args</span></code> is an empty list,
+so if the program you’re analyzing expects to find at least an <code class="docutils literal notranslate"><span class="pre">argv[0]</span></code>,
+you should always provide that!</p></li>
+<li><p>If you’d like to have <code class="docutils literal notranslate"><span class="pre">argc</span></code> be symbolic, you can pass a symbolic bitvector
+as <code class="docutils literal notranslate"><span class="pre">argc</span></code> to the <code class="docutils literal notranslate"><span class="pre">entry_state</span></code> and <code class="docutils literal notranslate"><span class="pre">full_init_state</span></code> constructors. Be
+careful, though: if you do this, you should also add a constraint to the
+resulting state that your value for argc cannot be larger than the number of
+args you passed into <code class="docutils literal notranslate"><span class="pre">args</span></code>.</p></li>
+<li><p>To use the call state, you should call it with <code class="docutils literal notranslate"><span class="pre">.call_state(addr,</span> <span class="pre">arg1,</span> <span class="pre">arg2,</span>
+<span class="pre">...)</span></code>, where <code class="docutils literal notranslate"><span class="pre">addr</span></code> is the address of the function you want to call and
+<code class="docutils literal notranslate"><span class="pre">argN</span></code> is the Nth argument to that function, either as a Python integer,
+string, or array, or a bitvector. If you want to have memory allocated and
+actually pass in a pointer to an object, you should wrap it in an
+PointerWrapper, i.e. <code class="docutils literal notranslate"><span class="pre">bisa.PointerWrapper(&quot;point</span> <span class="pre">to</span> <span class="pre">me!&quot;)</span></code>. The results of
+this API can be a little unpredictable, but we’re working on it.</p></li>
+<li><p>To specify the calling convention used for a function with <code class="docutils literal notranslate"><span class="pre">call_state</span></code>, you
+can pass a <a class="reference internal" href="../api.html#bisa.calling_conventions.SimCC" title="bisa.calling_conventions.SimCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimCC</span></code></a> instance as the <code class="docutils literal notranslate"><span class="pre">cc</span></code>
+argument.:raw-html-m2r:<cite>&lt;br&gt;</cite> We try to pick a sane default, but for special
+cases you will need to help bisa out.</p></li>
+</ul>
+<p>There are several more options that can be used in any of these constructors!
+See the docs on the <code class="docutils literal notranslate"><span class="pre">project.factory</span></code> object (an
+<a class="reference internal" href="../api.html#bisa.factory.BISAObjectFactory" title="bisa.factory.BISAObjectFactory"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisa.factory.BISAObjectFactory</span></code></a>) for more details.</p>
+</section>
+<section id="low-level-interface-for-memory">
+<h2>Low level interface for memory<a class="headerlink" href="#low-level-interface-for-memory" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">state.mem</span></code> interface is convenient for loading typed data from memory,
+but when you want to do raw loads and stores to and from ranges of memory, it’s
+very cumbersome. It turns out that <code class="docutils literal notranslate"><span class="pre">state.mem</span></code> is actually just a bunch of
+logic to correctly access the underlying memory storage, which is just a flat
+address space filled with bitvector data: <code class="docutils literal notranslate"><span class="pre">state.memory</span></code>. You can use
+<code class="docutils literal notranslate"><span class="pre">state.memory</span></code> directly with the <code class="docutils literal notranslate"><span class="pre">.load(addr,</span> <span class="pre">size)</span></code> and <code class="docutils literal notranslate"><span class="pre">.store(addr,</span>
+<span class="pre">val)</span></code> methods:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">blank_state</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">memory</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="mh">0x4000</span><span class="p">,</span> <span class="n">claripy</span><span class="o">.</span><span class="n">BVV</span><span class="p">(</span><span class="mh">0x0123456789abcdef0123456789abcdef</span><span class="p">,</span> <span class="mi">128</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">memory</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="mh">0x4004</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="c1"># load-size is in bytes</span>
+<span class="go">&lt;BV48 0x89abcdef0123&gt;</span>
+</pre></div>
+</div>
+<p>As you can see, the data is loaded and stored in a “big-endian” fashion, since
+the primary purpose of <code class="docutils literal notranslate"><span class="pre">state.memory</span></code> is to load an store swaths of data with
+no attached semantics. However, if you want to perform a byteswap on the loaded
+or stored data, you can pass a keyword argument <code class="docutils literal notranslate"><span class="pre">endness</span></code> - if you specify
+little-endian, byteswap will happen. The endness should be one of the members of
+the <code class="docutils literal notranslate"><span class="pre">Endness</span></code> enum in the <code class="docutils literal notranslate"><span class="pre">archinfo</span></code> package used to hold declarative data
+about CPU architectures for bisa. Additionally, the endness of the program being
+analyzed can be found as <code class="docutils literal notranslate"><span class="pre">arch.memory_endness</span></code> - for instance
+<code class="docutils literal notranslate"><span class="pre">state.arch.memory_endness</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">archinfo</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">memory</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="mh">0x4000</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">endness</span><span class="o">=</span><span class="n">archinfo</span><span class="o">.</span><span class="n">Endness</span><span class="o">.</span><span class="n">LE</span><span class="p">)</span>
+<span class="go">&lt;BV32 0x67452301&gt;</span>
+</pre></div>
+</div>
+<p>There is also a low-level interface for register access, <code class="docutils literal notranslate"><span class="pre">state.registers</span></code>,
+that uses the exact same API as <code class="docutils literal notranslate"><span class="pre">state.memory</span></code>, but explaining its behavior
+involves a <a class="reference internal" href="../advanced-topics/ir.html#intermediate-representation"><span class="std std-ref">dive</span></a> into the abstractions that
+bisa uses to seamlessly work with multiple architectures. The short version is
+that it is simply a register file, with the mapping between registers and
+offsets defined in <a class="reference external" href="https://github.com/bisa/archinfo">archinfo</a>.</p>
+</section>
+<section id="state-options">
+<h2>State Options<a class="headerlink" href="#state-options" title="Link to this heading">¶</a></h2>
+<p>There are a lot of little tweaks that can be made to the internals of bisa that
+will optimize behavior in some situations and be a detriment in others. These
+tweaks are controlled through state options.</p>
+<p>On each SimState object, there is a set (<code class="docutils literal notranslate"><span class="pre">state.options</span></code>) of all its enabled
+options. Each option (really just a string) controls the behavior of bisa’s
+execution engine in some minute way. A listing of the full domain of options,
+along with the defaults for different state types, can be found in <a class="reference internal" href="../appendix/options.html#list-of-state-options"><span class="std std-ref">the
+appendix</span></a>. You can access an individual option for
+adding to a state through <code class="docutils literal notranslate"><span class="pre">bisa.options</span></code>. The individual options are named
+with CAPITAL_LETTERS, but there are also common groupings of objects that you
+might want to use bundled together, named with lowercase_letters.</p>
+<p>When creating a SimState through any constructor, you may pass the keyword
+arguments <code class="docutils literal notranslate"><span class="pre">add_options</span></code> and <code class="docutils literal notranslate"><span class="pre">remove_options</span></code>, which should be sets of
+options that modify the initial options set from the default.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example: enable lazy solves, an option that causes state satisfiability to be checked as infrequently as possible.</span>
+<span class="c1"># This change to the settings will be propagated to all successor states created from this state after this line.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">s</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">bisa</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">LAZY_SOLVES</span><span class="p">)</span>
+
+<span class="c1"># Create a new state with lazy solves enabled</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">s</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">entry_state</span><span class="p">(</span><span class="n">add_options</span><span class="o">=</span><span class="p">{</span><span class="n">bisa</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">LAZY_SOLVES</span><span class="p">})</span>
+
+<span class="c1"># Create a new state without simplification options enabled</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">s</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">entry_state</span><span class="p">(</span><span class="n">remove_options</span><span class="o">=</span><span class="n">bisa</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">simplification</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="state-plugins">
+<h2>State Plugins<a class="headerlink" href="#state-plugins" title="Link to this heading">¶</a></h2>
+<p>With the exception of the set of options just discussed, everything stored in a
+SimState is actually stored in a <em>plugin</em> attached to the state. Almost every
+property on the state we’ve discussed so far is a plugin - <code class="docutils literal notranslate"><span class="pre">memory</span></code>,
+<code class="docutils literal notranslate"><span class="pre">registers</span></code>, <code class="docutils literal notranslate"><span class="pre">mem</span></code>, <code class="docutils literal notranslate"><span class="pre">regs</span></code>, <code class="docutils literal notranslate"><span class="pre">solver</span></code>, etc. This design allows for code
+modularity as well as the ability to easily <a class="reference internal" href="../extending-bisa/state_plugins.html#state-plugins"><span class="std std-ref">implement new kinds of data
+storage</span></a> for other aspects of an emulated state, or the ability
+to provide alternate implementations of plugins.</p>
+<p>For example, the normal <code class="docutils literal notranslate"><span class="pre">memory</span></code> plugin simulates a flat memory space, but
+analyses can choose to enable the “abstract memory” plugin, which uses alternate
+data types for addresses to simulate free-floating memory mappings independent
+of address, to provide <code class="docutils literal notranslate"><span class="pre">state.memory</span></code>. Conversely, plugins can reduce code
+complexity: <code class="docutils literal notranslate"><span class="pre">state.memory</span></code> and <code class="docutils literal notranslate"><span class="pre">state.registers</span></code> are actually two different
+instances of the same plugin, since the registers are emulated with an address
+space as well.</p>
+<section id="the-globals-plugin">
+<h3>The globals plugin<a class="headerlink" href="#the-globals-plugin" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">state.globals</span></code> is an extremely simple plugin: it implements the interface of
+a standard Python dict, allowing you to store arbitrary data on a state.</p>
+</section>
+<section id="the-history-plugin">
+<h3>The history plugin<a class="headerlink" href="#the-history-plugin" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">state.history</span></code> is a very important plugin storing historical data about the
+path a state has taken during execution. It is actually a linked list of several
+history nodes, each one representing a single round of execution—you can
+traverse this list with <code class="docutils literal notranslate"><span class="pre">state.history.parent.parent</span></code> etc.</p>
+<p>To make it more convenient to work with this structure, the history also
+provides several efficient iterators over the history of certain values. In
+general, these values are stored as <code class="docutils literal notranslate"><span class="pre">history.recent_NAME</span></code> and the iterator
+over them is just <code class="docutils literal notranslate"><span class="pre">history.NAME</span></code>. For example, <code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">addr</span> <span class="pre">in</span>
+<span class="pre">state.history.bbl_addrs:</span> <span class="pre">print</span> <span class="pre">hex(addr)</span></code> will print out a basic block address
+trace for the binary, while <code class="docutils literal notranslate"><span class="pre">state.history.recent_bbl_addrs</span></code> is the list of
+basic blocks executed in the most recent step,
+<code class="docutils literal notranslate"><span class="pre">state.history.parent.recent_bbl_addrs</span></code> is the list of basic blocks executed
+in the previous step, etc. If you ever need to quickly obtain a flat list of
+these values, you can access <code class="docutils literal notranslate"><span class="pre">.hardcopy</span></code>, e.g.
+<code class="docutils literal notranslate"><span class="pre">state.history.bbl_addrs.hardcopy</span></code>. Keep in mind though, index-based accessing
+is implemented on the iterators.</p>
+<p>Here is a brief listing of some of the values stored in the history:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">history.descriptions</span></code> is a listing of string descriptions of each of the
+rounds of execution performed on the state.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">history.bbl_addrs</span></code> is a listing of the basic block addresses executed by
+the state. There may be more than one per round of execution, and not all
+addresses may correspond to binary code - some may be addresses at which
+SimProcedures are hooked.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">history.jumpkinds</span></code> is a listing of the disposition of each of the control
+flow transitions in the state’s history, as VEX enum strings.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">history.jump_guards</span></code> is a listing of the conditions guarding each of the
+branches that the state has encountered.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">history.events</span></code> is a semantic listing of “interesting events” which
+happened during execution, such as the presence of a symbolic jump condition,
+the program popping up a message box, or execution terminating with an exit
+code.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">history.actions</span></code> is usually empty, but if you add the <code class="docutils literal notranslate"><span class="pre">bisa.options.refs</span></code>
+options to the state, it will be populated with a log of all the memory,
+register, and temporary value accesses performed by the program.</p></li>
+</ul>
+</section>
+<section id="the-callstack-plugin">
+<h3>The callstack plugin<a class="headerlink" href="#the-callstack-plugin" title="Link to this heading">¶</a></h3>
+<p>bisa will track the call stack for the emulated program. On every call
+instruction, a frame will be added to the top of the tracked callstack, and
+whenever the stack pointer drops below the point where the topmost frame was
+called, a frame is popped. This allows bisa to robustly store data local to the
+current emulated function.</p>
+<p>Similar to the history, the callstack is also a linked list of nodes, but there
+are no provided iterators over the contents of the nodes - instead you can
+directly iterate over <code class="docutils literal notranslate"><span class="pre">state.callstack</span></code> to get the callstack frames for each
+of the active frames, in order from most recent to oldest. If you just want the
+topmost frame, this is <code class="docutils literal notranslate"><span class="pre">state.callstack</span></code>.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">callstack.func_addr</span></code> is the address of the function currently being
+executed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">callstack.call_site_addr</span></code> is the address of the basic block which called
+the current function</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">callstack.stack_ptr</span></code> is the value of the stack pointer from the beginning
+of the current function</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">callstack.ret_addr</span></code> is the location that the current function will return
+to if it returns</p></li>
+</ul>
+</section>
+</section>
+<section id="more-about-i-o-files-file-systems-and-network-sockets">
+<h2>More about I/O: Files, file systems, and network sockets<a class="headerlink" href="#more-about-i-o-files-file-systems-and-network-sockets" title="Link to this heading">¶</a></h2>
+<p>Please refer to <a class="reference internal" href="../advanced-topics/file_system.html#working-with-file-system-sockets-and-pipes"><span class="std std-ref">Working with File System, Sockets, and Pipes</span></a> for a more
+complete and detailed documentation of how I/O is modeled in bisa.</p>
+</section>
+<section id="copying-and-merging">
+<h2>Copying and Merging<a class="headerlink" href="#copying-and-merging" title="Link to this heading">¶</a></h2>
+<p>A state supports very fast copies, so that you can explore different
+possibilities:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span> <span class="o">=</span> <span class="n">bisa</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="s1">&#39;/bin/true&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">blank_state</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="mh">0x1000</span><span class="p">]</span><span class="o">.</span><span class="n">uint32_t</span> <span class="o">=</span> <span class="mh">0x41414141</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="mh">0x1000</span><span class="p">]</span><span class="o">.</span><span class="n">uint32_t</span> <span class="o">=</span> <span class="mh">0x42424242</span>
+</pre></div>
+</div>
+<p>States can also be merged together.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># merge will return a tuple. the first element is the merged state</span>
+<span class="c1"># the second element is a symbolic variable describing a state flag</span>
+<span class="c1"># the third element is a boolean describing whether any merging was done</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">(</span><span class="n">s_merged</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">anything_merged</span><span class="p">)</span> <span class="o">=</span> <span class="n">s1</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">s2</span><span class="p">)</span>
+
+<span class="c1"># this is now an expression that can resolve to &quot;AAAA&quot; *or* &quot;BBBB&quot;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">aaaa_or_bbbb</span> <span class="o">=</span> <span class="n">s_merged</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="mh">0x1000</span><span class="p">]</span><span class="o">.</span><span class="n">uint32_t</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>describe limitations of merging</p>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">bisa</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Core Concepts</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="toplevel.html">Core Concepts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="loading.html">Loading a Binary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver.html">Symbolic Expressions and Constraint Solving</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Machine State - memory, registers, and so on</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pathgroups.html">Simulation Managers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation.html">Simulation  and Instrumentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analyses.html">Analyses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symbolic.html">Symbolic Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="be_creative.html">A final word of advice</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../analyses/index.html">Build-in Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced-topics/index.html">Advanced Topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-bisa/index.html">Extending bisa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">bisa examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/index.html">Appendix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Core Concepts</a><ul>
+      <li>Previous: <a href="solver.html" title="previous chapter">Symbolic Expressions and Constraint Solving</a></li>
+      <li>Next: <a href="pathgroups.html" title="next chapter">Simulation Managers</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, The bisa Project contributors.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/core-concepts/states.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

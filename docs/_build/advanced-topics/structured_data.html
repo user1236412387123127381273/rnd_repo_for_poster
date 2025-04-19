@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Working with Data and Conventions &#8212; bisa  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Solver Engine" href="claripy.html" />
+    <link rel="prev" title="Intermediate Representation" href="ir.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="working-with-data-and-conventions">
+<h1>Working with Data and Conventions<a class="headerlink" href="#working-with-data-and-conventions" title="Link to this heading">¶</a></h1>
+<p>Frequently, you’ll want to access structured data from the program you’re
+analyzing. bisa has several features to make this less of a headache.</p>
+<section id="working-with-types">
+<h2>Working with types<a class="headerlink" href="#working-with-types" title="Link to this heading">¶</a></h2>
+<p>bisa has a system for representing types. These SimTypes are found in
+<code class="docutils literal notranslate"><span class="pre">bisa.types</span></code> - an instance of any of these classes represents a type. Many of
+the types are incomplete unless they are supplemented with a SimState - their
+size depends on the architecture you’re running under. You may do this with
+<code class="docutils literal notranslate"><span class="pre">ty.with_arch(arch)</span></code>, which returns a copy of itself, with the architecture
+specified.</p>
+<p>bisa also has a light wrapper around <code class="docutils literal notranslate"><span class="pre">pycparser</span></code>, which is a C parser.
+This helps with getting instances of type objects:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">bisa</span><span class="o">,</span><span class="w"> </span><span class="nn">monkeyhex</span>
+
+<span class="go"># note that SimType objects have their __repr__ defined to return their c type name,</span>
+<span class="go"># so this function actually returned a SimType instance.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bisa</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">parse_type</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">)</span>
+<span class="go">int</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bisa</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">parse_type</span><span class="p">(</span><span class="s1">&#39;char **&#39;</span><span class="p">)</span>
+<span class="go">char**</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bisa</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">parse_type</span><span class="p">(</span><span class="s1">&#39;struct aa {int x; long y;}&#39;</span><span class="p">)</span>
+<span class="go">struct aa</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bisa</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">parse_type</span><span class="p">(</span><span class="s1">&#39;struct aa {int x; long y;}&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">fields</span>
+<span class="go">OrderedDict([(&#39;x&#39;, int), (&#39;y&#39;, long)])</span>
+</pre></div>
+</div>
+<p>Additionally, you may parse C definitions and have them returned to you in a
+dict, either of variable/function declarations or of newly defined types:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bisa</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">parse_defns</span><span class="p">(</span><span class="s2">&quot;int x; typedef struct llist { char* str; struct llist *next; } list_node; list_node *y;&quot;</span><span class="p">)</span>
+<span class="go">{&#39;x&#39;: int, &#39;y&#39;: struct llist*}</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">defs</span> <span class="o">=</span> <span class="n">bisa</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">parse_types</span><span class="p">(</span><span class="s2">&quot;int x; typedef struct llist { char* str; struct llist *next; } list_node; list_node *y;&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">defs</span>
+<span class="go">{&#39;struct llist&#39;: struct llist, &#39;list_node&#39;: struct llist}</span>
+
+<span class="go"># if you want to get both of these dicts at once, use parse_file, which returns both in a tuple.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bisa</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">parse_file</span><span class="p">(</span><span class="s2">&quot;int x; typedef struct llist { char* str; struct llist *next; } list_node; list_node *y;&quot;</span><span class="p">)</span>
+<span class="go">({&#39;x&#39;: int, &#39;y&#39;: struct llist*},</span>
+<span class="go"> {&#39;struct llist&#39;: struct llist, &#39;list_node&#39;: struct llist})</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">defs</span><span class="p">[</span><span class="s1">&#39;list_node&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fields</span>
+<span class="go">OrderedDict([(&#39;str&#39;, char*), (&#39;next&#39;, struct llist*)])</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">defs</span><span class="p">[</span><span class="s1">&#39;list_node&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;next&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">pts_to</span><span class="o">.</span><span class="n">fields</span>
+<span class="go">OrderedDict([(&#39;str&#39;, char*), (&#39;next&#39;, struct llist*)])</span>
+
+<span class="go"># If you want to get a function type and you don&#39;t want to construct it manually,</span>
+<span class="go"># you can use parse_type</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bisa</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">parse_type</span><span class="p">(</span><span class="s2">&quot;int (int y, double z)&quot;</span><span class="p">)</span>
+<span class="go">(int, double) -&gt; int</span>
+</pre></div>
+</div>
+<p>And finally, you can register struct definitions for future use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bisa</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">register_types</span><span class="p">(</span><span class="n">bisa</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">parse_type</span><span class="p">(</span><span class="s1">&#39;struct abcd { int x; int y; }&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bisa</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">register_types</span><span class="p">(</span><span class="n">bisa</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">parse_types</span><span class="p">(</span><span class="s1">&#39;typedef long time_t;&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bisa</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">parse_defns</span><span class="p">(</span><span class="s1">&#39;struct abcd a; time_t b;&#39;</span><span class="p">)</span>
+<span class="go">{&#39;a&#39;: struct abcd, &#39;b&#39;: long}</span>
+</pre></div>
+</div>
+<p>These type objects aren’t all that useful on their own, but they can be passed
+to other parts of bisa to specify data types.</p>
+</section>
+<section id="accessing-typed-data-from-memory">
+<h2>Accessing typed data from memory<a class="headerlink" href="#accessing-typed-data-from-memory" title="Link to this heading">¶</a></h2>
+<p>Now that you know how bisa’s type system works, you can unlock the full power of
+the <code class="docutils literal notranslate"><span class="pre">state.mem</span></code> interface! Any type that’s registered with the types module
+can be used to extract data from memory.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">bisa</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="s1">&#39;examples/fauxware/fauxware&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">entry_state</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="mh">0x601048</span><span class="p">]</span>
+<span class="go">&lt;&lt;untyped&gt; &lt;unresolvable&gt; at 0x601048&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="mh">0x601048</span><span class="p">]</span><span class="o">.</span><span class="n">long</span>
+<span class="go">&lt;long (64 bits) &lt;BV64 0x4008d0&gt; at 0x601048&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="mh">0x601048</span><span class="p">]</span><span class="o">.</span><span class="n">long</span><span class="o">.</span><span class="n">resolved</span>
+<span class="go">&lt;BV64 0x4008d0&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="mh">0x601048</span><span class="p">]</span><span class="o">.</span><span class="n">long</span><span class="o">.</span><span class="n">concrete</span>
+<span class="go">0x4008d0</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="mh">0x601048</span><span class="p">]</span><span class="o">.</span><span class="n">struct</span><span class="o">.</span><span class="n">abcd</span>
+<span class="go">&lt;struct abcd {</span>
+<span class="go">  .x = &lt;BV32 0x4008d0&gt;,</span>
+<span class="go">  .y = &lt;BV32 0x0&gt;</span>
+<span class="go">} at 0x601048&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="mh">0x601048</span><span class="p">]</span><span class="o">.</span><span class="n">struct</span><span class="o">.</span><span class="n">abcd</span><span class="o">.</span><span class="n">x</span>
+<span class="go">&lt;int (32 bits) &lt;BV32 0x4008d0&gt; at 0x601048&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="mh">0x601048</span><span class="p">]</span><span class="o">.</span><span class="n">struct</span><span class="o">.</span><span class="n">abcd</span><span class="o">.</span><span class="n">y</span>
+<span class="go">&lt;int (32 bits) &lt;BV32 0x0&gt; at 0x60104c&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="mh">0x601048</span><span class="p">]</span><span class="o">.</span><span class="n">deref</span>
+<span class="go">&lt;&lt;untyped&gt; &lt;unresolvable&gt; at 0x4008d0&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="mh">0x601048</span><span class="p">]</span><span class="o">.</span><span class="n">deref</span><span class="o">.</span><span class="n">string</span>
+<span class="go">&lt;string_t &lt;BV64 0x534f534e45414b59&gt; at 0x4008d0&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="mh">0x601048</span><span class="p">]</span><span class="o">.</span><span class="n">deref</span><span class="o">.</span><span class="n">string</span><span class="o">.</span><span class="n">resolved</span>
+<span class="go">&lt;BV64 0x534f534e45414b59&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="mh">0x601048</span><span class="p">]</span><span class="o">.</span><span class="n">deref</span><span class="o">.</span><span class="n">string</span><span class="o">.</span><span class="n">concrete</span>
+<span class="go">b&#39;SOSNEAKY&#39;</span>
+</pre></div>
+</div>
+<p>The interface works like this:</p>
+<ul class="simple">
+<li><p>You first use [array index notation] to specify the address you’d like to load
+from</p></li>
+<li><p>If at that address is a pointer, you may access the <code class="docutils literal notranslate"><span class="pre">deref</span></code> property to
+return a SimMemView at the address present in memory.</p></li>
+<li><p>You then specify a type for the data by simply accessing a property of that
+name. For a list of supported types, look at <code class="docutils literal notranslate"><span class="pre">state.mem.types</span></code>.</p></li>
+<li><p>You can then <em>refine</em> the type. Any type may support any refinement it likes.
+Right now the only refinements supported are that you may access any member of
+a struct by its member name, and you may index into a string or array to
+access that element.</p></li>
+<li><p>If the address you specified initially points to an array of that type, you
+can say <code class="docutils literal notranslate"><span class="pre">.array(n)</span></code> to view the data as an array of n elements.</p></li>
+<li><p>Finally, extract the structured data with <code class="docutils literal notranslate"><span class="pre">.resolved</span></code> or <code class="docutils literal notranslate"><span class="pre">.concrete</span></code>.
+<code class="docutils literal notranslate"><span class="pre">.resolved</span></code> will return bitvector values, while <code class="docutils literal notranslate"><span class="pre">.concrete</span></code> will return
+integer, string, array, etc values, whatever best represents the data.</p></li>
+<li><p>Alternately, you may store a value to memory, by assigning to the chain of
+properties that you’ve constructed. Note that because of the way Python works,
+<code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">s.mem[...].prop;</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">val</span></code> will NOT work, you must say <code class="docutils literal notranslate"><span class="pre">s.mem[...].prop</span>
+<span class="pre">=</span> <span class="pre">val</span></code>.</p></li>
+</ul>
+<p>If you define a struct using <code class="docutils literal notranslate"><span class="pre">register_types(parse_type(struct_expr))</span></code>, you
+can access it here as a type:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">mem</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">entry</span><span class="p">]</span><span class="o">.</span><span class="n">struct</span><span class="o">.</span><span class="n">abcd</span>
+<span class="go">&lt;struct abcd {</span>
+<span class="go">  .x = &lt;BV32 0x8949ed31&gt;,</span>
+<span class="go">  .y = &lt;BV32 0x89485ed1&gt;</span>
+<span class="go">} at 0x400580&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="working-with-calling-conventions">
+<h2>Working with Calling Conventions<a class="headerlink" href="#working-with-calling-conventions" title="Link to this heading">¶</a></h2>
+<p>A calling convention is the specific means by which code passes arguments and
+return values through function calls. bisa’s abstraction of calling conventions
+is called SimCC. You can construct new SimCC instances through the bisa object
+factory, with <code class="docutils literal notranslate"><span class="pre">p.factory.cc(...)</span></code>. This will give a calling convention which
+is guessed based your guest architecture and OS. If bisa guesses wrong, you can
+explicitly pick one of the calling conventions in the
+<code class="docutils literal notranslate"><span class="pre">bisa.calling_conventions</span></code> module.</p>
+<p>If you have a very wacky calling convention, you can use
+<code class="docutils literal notranslate"><span class="pre">bisa.calling_conventions.SimCCUsercall</span></code>. This will ask you to specify
+locations for the arguments and the return value. To do this, use instances of
+the <code class="docutils literal notranslate"><span class="pre">SimRegArg</span></code> or <code class="docutils literal notranslate"><span class="pre">SimStackArg</span></code> classes. You can find them in the factory -
+<code class="docutils literal notranslate"><span class="pre">p.factory.cc.Sim*Arg</span></code>.</p>
+<p>Once you have a SimCC object, you can use it along with a SimState object and a
+function prototype (a SimTypeFunction) to extract or store function arguments
+more cleanly. Take a look at the <code class="xref py py-class docutils literal notranslate"><span class="pre">bisa.calling_conventions.SimCC&gt;</span></code> for
+details. Alternately, you can pass it to an interface that can use it to modify
+its own behavior, like <code class="docutils literal notranslate"><span class="pre">p.factory.call_state</span></code>, or…</p>
+</section>
+<section id="callables">
+<h2>Callables<a class="headerlink" href="#callables" title="Link to this heading">¶</a></h2>
+<p>Callables are a Foreign Functions Interface (FFI) for symbolic execution. Basic
+callable usage is to create one with <code class="docutils literal notranslate"><span class="pre">myfunc</span> <span class="pre">=</span> <span class="pre">p.factory.callable(addr)</span></code>, and
+then call it! <code class="docutils literal notranslate"><span class="pre">result</span> <span class="pre">=</span> <span class="pre">myfunc(args,</span> <span class="pre">...)</span></code> When you call the callable, bisa
+will set up a <code class="docutils literal notranslate"><span class="pre">call_state</span></code> at the given address, dump the given arguments into
+memory, and run a <code class="docutils literal notranslate"><span class="pre">path_group</span></code> based on this state until all the paths have
+exited from the function. Then, it merges all the result states together, pulls
+the return value out of that state, and returns it.</p>
+<p>All the interaction with the state happens with the aid of a <code class="docutils literal notranslate"><span class="pre">SimCC</span></code> and a
+<code class="docutils literal notranslate"><span class="pre">SimTypeFunction</span></code>, to tell where to put the arguments and where to get the
+return value. It will try to use a sane default for the architecture, but if
+you’d like to customize it, you can pass a <code class="docutils literal notranslate"><span class="pre">SimCC</span></code> object in the <code class="docutils literal notranslate"><span class="pre">cc</span></code>
+keyword argument when constructing the callable. The <code class="docutils literal notranslate"><span class="pre">SimTypeFunction</span></code> is
+required - you must pass the <code class="docutils literal notranslate"><span class="pre">prototype</span></code> parameter. If you pass a string to
+this parameter it will be parsed as a function declaration.</p>
+<p>You can pass symbolic data as function arguments, and everything will work fine.
+You can even pass more complicated data, like strings, lists, and structures as
+native Python data (use tuples for structures), and it’ll be serialized as
+cleanly as possible into the state. If you’d like to specify a pointer to a
+certain value, you can wrap it in a <code class="docutils literal notranslate"><span class="pre">PointerWrapper</span></code> object, available as
+<code class="docutils literal notranslate"><span class="pre">p.factory.callable.PointerWrapper</span></code>. The exact semantics of how
+pointer-wrapping work are a little confusing, but they can be boiled down to
+“unless you specify it with a PointerWrapper or a specific SimArrayType, nothing
+will be wrapped in a pointer automatically unless it gets to the end and it
+hasn’t yet been wrapped in a pointer yet and the original type is a string,
+array, or tuple.” The relevant code is actually in SimCC - it’s the
+<code class="docutils literal notranslate"><span class="pre">setup_callsite</span></code> function.</p>
+<p>If you don’t care for the actual return value of the call, you can say
+<code class="docutils literal notranslate"><span class="pre">func.perform_call(arg,</span> <span class="pre">...)</span></code>, and then the properties <code class="docutils literal notranslate"><span class="pre">func.result_state</span></code>
+and <code class="docutils literal notranslate"><span class="pre">func.result_path_group</span></code> will be populated. They will actually be
+populated even if you call the callable normally, but you probably care about
+them more in this case!</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">bisa</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core-concepts/index.html">Core Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyses/index.html">Build-in Analyses</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Advanced Topics</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="gotchas.html">Gotchas when using bisa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html">Understanding the Execution Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mixins.html">What’s Up With Mixins, Anyway?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="speed.html">Optimization considerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="file_system.html">Working with File System, Sockets, and Pipes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ir.html">Intermediate Representation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Working with Data and Conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="claripy.html">Solver Engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concretization_strategies.html">Symbolic memory addressing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="java_support.html">Java Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symbion.html">Symbion: Interleaving symbolic and concrete execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debug_var.html">Debug variable resolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debug_var.html#variable-visibility">Variable visibility</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-bisa/index.html">Extending bisa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">bisa examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/index.html">Appendix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Advanced Topics</a><ul>
+      <li>Previous: <a href="ir.html" title="previous chapter">Intermediate Representation</a></li>
+      <li>Next: <a href="claripy.html" title="next chapter">Solver Engine</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, The bisa Project contributors.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/advanced-topics/structured_data.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

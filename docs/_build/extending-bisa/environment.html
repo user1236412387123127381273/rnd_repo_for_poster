@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Extending the Environment Model &#8212; bisa  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Writing Analyses" href="analysis_writing.html" />
+    <link rel="prev" title="State Plugins" href="state_plugins.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="extending-the-environment-model">
+<h1>Extending the Environment Model<a class="headerlink" href="#extending-the-environment-model" title="Link to this heading">¶</a></h1>
+<p>One of the biggest issues you may encounter while using bisa to analyze programs
+is an incomplete model of the environment, or the APIs, surrounding your
+program. This usually takes the form of syscalls or dynamic library calls, or in
+rare cases, loader artifacts. bisa provides a convenient interface to do most of
+these things!</p>
+<p>Everything discussed here involves writing SimProcedures, so <a class="reference internal" href="simprocedures.html#hooks-and-simprocedures"><span class="std std-ref">make sure you
+know how to do that!</span></a>.</p>
+<p>Note that this page should be treated as a narrative document, not a reference
+document, so you should read it at least once start to end.</p>
+<section id="setup">
+<h2>Setup<a class="headerlink" href="#setup" title="Link to this heading">¶</a></h2>
+<p>You <em>probably</em> want to have a development install of bisa, i.e. set up with the
+script in the <a class="reference external" href="https://github.com/bisa/bisa-dev">bisa-dev repository</a>. It is
+remarkably easy to add new API models by just implementing them in certain
+folders of the bisa repository. This is also desirable because any work you do
+in this field will almost always be useful to other people, and this makes it
+extremely easy to submit a pull request.</p>
+<p>However, if you want to do your development out-of-tree, you want to work
+against a production version of bisa, or you want to make customized versions of
+already-implemented API functions, there are ways to incorporate your extensions
+programmatically. Both these techniques, in-tree and out-of-tree, will be
+documented at each step.</p>
+</section>
+<section id="dynamic-library-functions-import-dependencies">
+<h2>Dynamic library functions - import dependencies<a class="headerlink" href="#dynamic-library-functions-import-dependencies" title="Link to this heading">¶</a></h2>
+<p>This is the easiest case, and the case that SimProcedures were originally
+designed for.</p>
+<p>First, you need to write a SimProcedure representing the function.
+Then you need to let bisa know about it.</p>
+<section id="case-1-in-tree-development-simlibraries-and-catalogues">
+<h3>Case 1, in-tree development: SimLibraries and catalogues<a class="headerlink" href="#case-1-in-tree-development-simlibraries-and-catalogues" title="Link to this heading">¶</a></h3>
+<p>bisa has a magical folder in its repository, <a class="reference external" href="https://github.com/bisa/bisa/tree/master/bisa/procedures">bisa/procedures</a>. Within it are all
+the SimProcedure implementations that come bundled with bisa as well as
+information about what libraries implement what functions.</p>
+<p>Each folder in the <code class="docutils literal notranslate"><span class="pre">procedures</span></code> directory corresponds to some sort of
+<em>standard</em>, or a body that specifies the interface part of an API and its
+semantics. We call each folder a <em>catalog</em> of procedures. For example, we have
+<code class="docutils literal notranslate"><span class="pre">libc</span></code> which contains the functions defined by the C standard library, and a
+separate folder <code class="docutils literal notranslate"><span class="pre">posix</span></code> which contains the functions defined by the posix
+standard. There is some magic which automatically scrapes these folders in the
+<code class="docutils literal notranslate"><span class="pre">procedures</span></code> directory and organizes them into the <code class="docutils literal notranslate"><span class="pre">bisa.SIM_PROCEDURES</span></code>
+dict. For example, <code class="docutils literal notranslate"><span class="pre">bisa/procedures/libc/printf.py</span></code> contains both <code class="docutils literal notranslate"><span class="pre">class</span>
+<span class="pre">printf</span></code> and <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">__printf_chk</span></code>, so there exists both
+<code class="docutils literal notranslate"><span class="pre">bisa.SIM_PROCEDURES['libc']['printf']</span></code> and
+<code class="docutils literal notranslate"><span class="pre">bisa.SIM_PROCEDURES['libc']['__printf_chk']</span></code>.</p>
+<p>The purpose of this categorization is to enable easy sharing of procedures among
+different libraries. For example. libc.so.6 contains all the C standard library
+functions, but so does msvcrt.dll! These relationships are represented with
+objects called <code class="docutils literal notranslate"><span class="pre">SimLibraries</span></code> which represent an actual shared library file,
+its functions, and their metadata. Take a look at the API reference for
+<a class="reference internal" href="../api.html#bisa.procedures.definitions.SimLibrary" title="bisa.procedures.definitions.SimLibrary"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimLibrary</span></code></a> along with <a class="reference external" href="https://github.com/bisa/bisa/blob/master/bisa/procedures/definitions/glibc.py">the code for
+setting up glibc</a>
+to learn how to use it.</p>
+<p>SimLibraries are defined in a special folder in the procedures directory,
+<code class="docutils literal notranslate"><span class="pre">procedures/definitions</span></code>. Files in here should contain an <em>instance</em>, not a
+subclass, of <code class="docutils literal notranslate"><span class="pre">SimLibrary</span></code>. The same magic that scrapes up SimProcedures will
+also scrape up SimLibraries and put them in <code class="docutils literal notranslate"><span class="pre">bisa.SIM_LIBRARIES</span></code>, keyed on
+each of their common names. For example,
+<code class="docutils literal notranslate"><span class="pre">bisa/procedures/definitions/linux_loader.py</span></code> contains <code class="docutils literal notranslate"><span class="pre">lib</span> <span class="pre">=</span> <span class="pre">SimLibrary();</span>
+<span class="pre">lib.set_library_names('ld.so',</span> <span class="pre">'ld-linux.so',</span> <span class="pre">'ld.so.2',</span> <span class="pre">'ld-linux.so.2',</span>
+<span class="pre">'ld-linux-x86_64.so.2')</span></code>, so you can access it via
+<code class="docutils literal notranslate"><span class="pre">bisa.SIM_LIBRARIES['ld.so'][0]</span></code> or <code class="docutils literal notranslate"><span class="pre">bisa.SIM_LIBRARIES['ld-linux.so'][0]</span></code>
+or any of the other names.</p>
+<p>At load time, all the dynamic library dependencies are looked up in
+<code class="docutils literal notranslate"><span class="pre">SIM_LIBRARIES</span></code> and their procedures (or stubs!) are hooked into the project’s
+address space to summarize any functions it can. The code for this process is
+found <a class="reference external" href="https://github.com/bisa/bisa/blob/master/bisa/project.py#L244">here</a>.</p>
+<p><strong>SO</strong>, the bottom line is that you can just write your own SimProcedure and
+SimLibrary definitions, drop them into the directory structure, and they’ll
+automatically be applied. If you’re adding a procedure to an existing library,
+you can just drop it into the appropriate catalog and it’ll be picked up by all
+the libraries using that catalog, since most libraries construct their list of
+function implementation by batch-adding entire catalogs.</p>
+</section>
+<section id="case-2-out-of-tree-development-tight-integration">
+<h3>Case 2, out-of-tree development, tight integration<a class="headerlink" href="#case-2-out-of-tree-development-tight-integration" title="Link to this heading">¶</a></h3>
+<p>If you’d like to implement your procedures outside the bisa repository, you can
+do that. You effectively do this by just manually adding your procedures to the
+appropriate SimLibrary. Just call <code class="docutils literal notranslate"><span class="pre">bisa.SIM_LIBRARIES[libname][0].add(name,</span>
+<span class="pre">proc_cls)</span></code> to do the registration.</p>
+<p>Note that this will only work if you do this before the project is loaded with
+<code class="docutils literal notranslate"><span class="pre">bisa.Project</span></code>. Note also that adding the procedure to
+<code class="docutils literal notranslate"><span class="pre">bisa.SIM_PROCEDURES</span></code>, i.e. adding it directly to a catalog, will <em>not</em> work,
+since these catalogs are used to construct the SimLibraries only at import and
+are used by value, not by reference.</p>
+</section>
+<section id="case-3-out-of-tree-development-loose-integration">
+<h3>Case 3, out-of-tree development, loose integration<a class="headerlink" href="#case-3-out-of-tree-development-loose-integration" title="Link to this heading">¶</a></h3>
+<p>Finally, if you don’t want to mess with SimLibraries at all, you can do things
+purely on the project level with <a class="reference internal" href="../api.html#bisa.project.Project.hook_symbol" title="bisa.project.Project.hook_symbol"><code class="xref py py-meth docutils literal notranslate"><span class="pre">hook_symbol()</span></code></a>.</p>
+</section>
+</section>
+<section id="syscalls">
+<h2>Syscalls<a class="headerlink" href="#syscalls" title="Link to this heading">¶</a></h2>
+<p>Unlike dynamic library methods, syscall procedures aren’t incorporated into the
+project via hooks. Instead, whenever a syscall instruction is encountered, the
+basic block should end with a jumpkind of <code class="docutils literal notranslate"><span class="pre">Ijk_Sys</span></code>. This will cause the next
+step to be handled by the SimOS associated with the project, which will extract
+the syscall number from the state and query a specialized SimLibrary with that.</p>
+<p>This deserves some explanation.</p>
+<p>There is a subclass of SimLibrary called SimSyscallLibrary which is used for
+collecting all the functions that are part of an operating system’s syscall
+interface. SimSyscallLibrary uses the same system for managing implementations
+and metadata as SimLibrary, but adds on top of it a system for managing syscall
+numbers for multiple ABIs (application binary interfaces, like an API but lower
+level). The best example for an implementation of a SimSyscallLibrary is the
+<a class="reference external" href="https://github.com/bisa/bisa/blob/master/bisa/procedures/definitions/linux_kernel.py">linux syscalls</a>.
+It keeps its procedures in a normal SimProcedure catalog called <code class="docutils literal notranslate"><span class="pre">linux_kernel</span></code>
+and adds them to the library, then adds several syscall number mappings,
+including separate mappings for <code class="docutils literal notranslate"><span class="pre">mips-o32</span></code>, <code class="docutils literal notranslate"><span class="pre">mips-n32</span></code>, and <code class="docutils literal notranslate"><span class="pre">mips-n64</span></code>.</p>
+<p>In order for syscalls to be supported in the first place, the project’s SimOS
+must inherit from <a class="reference internal" href="../api.html#bisa.simos.userland.SimUserland" title="bisa.simos.userland.SimUserland"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimUserland</span></code></a>, itself a SimOS
+subclass. This requires the class to call SimUserland’s constructor with a
+super() call that includes the <code class="docutils literal notranslate"><span class="pre">syscall_library</span></code> keyword argument, specifying
+the specific SimSyscallLibrary that contains the appropriate procedures and
+mappings for the operating system. Additionally, the class’s
+<code class="docutils literal notranslate"><span class="pre">configure_project</span></code> must perform a super() call including the <code class="docutils literal notranslate"><span class="pre">abi_list</span></code>
+keyword argument, which contains the list of ABIs that are valid for the current
+architecture. If the ABI for the syscall can’t be determined by just the syscall
+number, for example, that amd64 linux programs can use either <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">0x80</span></code> or
+<code class="docutils literal notranslate"><span class="pre">syscall</span></code> to invoke a syscall and these two ABIs use overlapping numbers, the
+SimOS cal override <code class="docutils literal notranslate"><span class="pre">syscall_abi()</span></code>, which takes a SimState and returns the
+name of the current syscall ABI. This is determined for int80/syscall by
+examining the most recent jumpkind, since libVEX will produce different syscall
+jumpkinds for the different instructions.</p>
+<p>Calling conventions for syscalls are a little weird right now and they ought to
+be refactored. The current situation requires that <code class="docutils literal notranslate"><span class="pre">bisa.SYSCALL_CC</span></code> be a map
+of maps <code class="docutils literal notranslate"><span class="pre">{arch_name:</span> <span class="pre">{os_name:</span> <span class="pre">cc_cls}}</span></code>, where <code class="docutils literal notranslate"><span class="pre">os_name</span></code> is the value of
+project.simos.name, and each of the calling convention classes must include an
+extra method called <code class="docutils literal notranslate"><span class="pre">syscall_number</span></code> which takes a state and return the
+current syscall number. Look at the bottom of <a class="reference external" href="https://github.com/bisa/bisa/blob/master/bisa/calling_conventions.py">calling_conventions.py</a> to
+learn more about it. Not very object-oriented at all…</p>
+<p>As a side note, each syscall is given a unique address in a special object in
+CLE called the “kernel object”. Upon a syscall, the address for the specific
+syscall is set into the state’s instruction pointer, so it will show up in the
+logs. These addresses are not hooked, they are just used to identify syscalls
+during analysis given only an address trace. The test for determining if an
+address corresponds to a syscall is <code class="docutils literal notranslate"><span class="pre">project.simos.is_syscall_addr(addr)</span></code> and
+the syscall corresponding to the address can be retrieved with
+<code class="docutils literal notranslate"><span class="pre">project.simos.syscall_from_addr(addr)</span></code>.</p>
+<section id="case-1-in-tree-development">
+<h3>Case 1, in-tree development<a class="headerlink" href="#case-1-in-tree-development" title="Link to this heading">¶</a></h3>
+<p>SimSyscallLibraries are stored in the same place as the normal SimLibraries,
+<code class="docutils literal notranslate"><span class="pre">bisa/procedures/definitions</span></code>. These libraries don’t have to specify any
+common name, but they can if they’d like to show up in <code class="docutils literal notranslate"><span class="pre">SIM_LIBRARIES</span></code> for
+easy access.</p>
+<p>The same thing about adding procedures to existing catalogs of dynamic library
+functions also applies to syscalls - implementing a linux syscall is as easy as
+writing the SimProcedure and dropping the implementation into
+<code class="docutils literal notranslate"><span class="pre">bisa/procedures/linux_kernel</span></code>. As long as the class name matches one of the
+names in the number-to-name mapping of the SimLibrary (all the linux syscall
+numbers are included with recent releases of bisa), it will be used.</p>
+<p>To add a new operating system entirely, you need to implement the SimOS as well,
+as a subclass of SimUserland. To integrate it into the tree, you should add it
+to the <code class="docutils literal notranslate"><span class="pre">simos</span></code> directory, but this is not a magic directory like
+<code class="docutils literal notranslate"><span class="pre">procedures</span></code>. Instead, you should add a line to <code class="docutils literal notranslate"><span class="pre">bisa/simos/__init__.py</span></code>
+calling <code class="docutils literal notranslate"><span class="pre">register_simos()</span></code> with the OS name as it appears in
+<code class="docutils literal notranslate"><span class="pre">project.loader.main_object.os</span></code> and the SimOS class. Your class should do
+everything described above.</p>
+</section>
+<section id="id1">
+<h3>Case 2, out-of-tree development, tight integration<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<p>You can add syscalls to a SimSyscallLibrary the same way you can add functions
+to a normal SimLibrary, by tweaking the entries in <code class="docutils literal notranslate"><span class="pre">bisa.SIM_LIBRARIES</span></code>. If
+you’re this for linux you want <code class="docutils literal notranslate"><span class="pre">bisa.SIM_LIBRARIES['linux'][0].add(name,</span>
+<span class="pre">proc_cls)</span></code>.</p>
+<p>You can register a SimOS with bisa from out-of-tree as well - the same
+<code class="docutils literal notranslate"><span class="pre">register_simos</span></code> method is just sitting there waiting for you as
+<code class="docutils literal notranslate"><span class="pre">bisa.simos.register_simos(name,</span> <span class="pre">simos_cls)</span></code>.</p>
+</section>
+<section id="id2">
+<h3>Case 3, out-of-tree development, loose integration<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<p>The SimSyscallLibrary the SimOS uses is copied from the original during setup,
+so it is safe to mutate. You can directly fiddle with
+<code class="docutils literal notranslate"><span class="pre">project.simos.syscall_library</span></code> to manipulate an individual project’s
+syscalls.</p>
+<p>You can provide a SimOS class (not an instance) directly to the <code class="docutils literal notranslate"><span class="pre">Project</span></code>
+constructor via the <code class="docutils literal notranslate"><span class="pre">simos</span></code> keyword argument, so you can specify the SimOS for
+a project explicitly if you like.</p>
+</section>
+</section>
+<section id="simdata">
+<h2>SimData<a class="headerlink" href="#simdata" title="Link to this heading">¶</a></h2>
+<p>What about when there is an import dependency on a data object? This is easily
+resolved when the given library is actually loaded into memory - the relocation
+can just be resolved as normal. However, when the library is not loaded (for
+example, <code class="docutils literal notranslate"><span class="pre">auto_load_libs=False</span></code>, or perhaps some dependency is simply
+missing), things get tricky. It is not possible to guess in most cases what the
+value should be, or even what its size should be, so if the guest program ever
+dereferences a pointer to such a symbol, emulation will go off the rails.</p>
+<p>CLE will warn you when this might happen:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">22</span><span class="p">:</span><span class="mi">26</span><span class="p">:</span><span class="mi">58</span><span class="p">]</span> <span class="p">[</span><span class="n">cle</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">externs</span><span class="p">]</span> <span class="o">|</span>  <span class="n">WARNING</span><span class="p">:</span> <span class="n">Symbol</span> <span class="n">was</span> <span class="n">allocated</span> <span class="n">without</span> <span class="n">a</span> <span class="n">known</span> <span class="n">size</span><span class="p">;</span> <span class="n">emulation</span> <span class="n">will</span> <span class="n">fail</span> <span class="k">if</span> <span class="n">it</span> <span class="ow">is</span> <span class="n">used</span> <span class="n">non</span><span class="o">-</span><span class="n">opaquely</span><span class="p">:</span> <span class="n">_rtld_global</span>
+<span class="p">[</span><span class="mi">22</span><span class="p">:</span><span class="mi">26</span><span class="p">:</span><span class="mi">58</span><span class="p">]</span> <span class="p">[</span><span class="n">cle</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">externs</span><span class="p">]</span> <span class="o">|</span>  <span class="n">WARNING</span><span class="p">:</span> <span class="n">Symbol</span> <span class="n">was</span> <span class="n">allocated</span> <span class="n">without</span> <span class="n">a</span> <span class="n">known</span> <span class="n">size</span><span class="p">;</span> <span class="n">emulation</span> <span class="n">will</span> <span class="n">fail</span> <span class="k">if</span> <span class="n">it</span> <span class="ow">is</span> <span class="n">used</span> <span class="n">non</span><span class="o">-</span><span class="n">opaquely</span><span class="p">:</span> <span class="n">__libc_enable_secure</span>
+<span class="p">[</span><span class="mi">22</span><span class="p">:</span><span class="mi">26</span><span class="p">:</span><span class="mi">58</span><span class="p">]</span> <span class="p">[</span><span class="n">cle</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">externs</span><span class="p">]</span> <span class="o">|</span>  <span class="n">WARNING</span><span class="p">:</span> <span class="n">Symbol</span> <span class="n">was</span> <span class="n">allocated</span> <span class="n">without</span> <span class="n">a</span> <span class="n">known</span> <span class="n">size</span><span class="p">;</span> <span class="n">emulation</span> <span class="n">will</span> <span class="n">fail</span> <span class="k">if</span> <span class="n">it</span> <span class="ow">is</span> <span class="n">used</span> <span class="n">non</span><span class="o">-</span><span class="n">opaquely</span><span class="p">:</span> <span class="n">_rtld_global_ro</span>
+<span class="p">[</span><span class="mi">22</span><span class="p">:</span><span class="mi">26</span><span class="p">:</span><span class="mi">58</span><span class="p">]</span> <span class="p">[</span><span class="n">cle</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">externs</span><span class="p">]</span> <span class="o">|</span>  <span class="n">WARNING</span><span class="p">:</span> <span class="n">Symbol</span> <span class="n">was</span> <span class="n">allocated</span> <span class="n">without</span> <span class="n">a</span> <span class="n">known</span> <span class="n">size</span><span class="p">;</span> <span class="n">emulation</span> <span class="n">will</span> <span class="n">fail</span> <span class="k">if</span> <span class="n">it</span> <span class="ow">is</span> <span class="n">used</span> <span class="n">non</span><span class="o">-</span><span class="n">opaquely</span><span class="p">:</span> <span class="n">_dl_argv</span>
+</pre></div>
+</div>
+<p>If you see this message and suspect it is causing issues (i.e. the program is
+actually introspecting the value of these symbols), you can resolve it by
+implementing and registering a SimData class, which is like a SimProcedure but
+for data. Simulated data. Very cool.</p>
+<p>A SimData can effectively specify some data that must be used to provide an
+unresolved import symbol. It has a number of mechanisms to make this more
+useful, including the ability to specify relocations and subdependencies.</p>
+<p>Look at the SimData <a class="reference external" href="https://docs.angr.io/projects/cle/en/latest/api/backend.html#cle.backends.externs.simdata.SimData" title="(in cle)"><code class="xref py py-class docutils literal notranslate"><span class="pre">cle.backends.externs.simdata.SimData</span></code></a> class
+reference and the <a class="reference external" href="https://github.com/bisa/cle/tree/master/cle/backends/externs/simdata">existing SimData subclasses</a> for
+guidelines on how to do this.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">bisa</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core-concepts/index.html">Core Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyses/index.html">Build-in Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced-topics/index.html">Advanced Topics</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Extending bisa</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="simprocedures.html">Hooks and SimProcedures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="state_plugins.html">State Plugins</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Extending the Environment Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis_writing.html">Writing Analyses</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">bisa examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/index.html">Appendix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Extending bisa</a><ul>
+      <li>Previous: <a href="state_plugins.html" title="previous chapter">State Plugins</a></li>
+      <li>Next: <a href="analysis_writing.html" title="next chapter">Writing Analyses</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, The bisa Project contributors.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/extending-bisa/environment.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

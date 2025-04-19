@@ -1,0 +1,20 @@
+# Read the Docs configuration file
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+
+version: 2
+sphinx:
+  configuration: docs/conf.py
+formats: [pdf]
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.10"
+  jobs:
+    post_create_environment:
+      - pip install -U pip "setuptools>=59" wheel "unicorn==2.0.1.post1"
+      - pip install git+https://github.com/bisa/archinfo.git
+      - pip install git+https://github.com/bisa/pyvex.git
+      - pip install git+https://github.com/bisa/cle.git
+      - pip install git+https://github.com/bisa/claripy.git
+      - pip install git+https://github.com/bisa/ailment.git
+      - pip install --no-build-isolation .[bisadb,docs,pcode]

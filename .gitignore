@@ -1,0 +1,11 @@
+uv.lock
+build
+bisa/lib
+*/*.so
+__pycache__
+*/__pycache__
+*/*/__pycache__
+*/*/*/__pycache__
+*/*.o
+.venv
+bisa.egg-info

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Migrating to bisa 9.1 &#8212; bisa  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Migrating to bisa 8" href="migration-8.html" />
+    <link rel="prev" title="Changelog" href="changelog.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="migrating-to-bisa-9-1">
+<h1>Migrating to bisa 9.1<a class="headerlink" href="#migrating-to-bisa-9-1" title="Link to this heading">¶</a></h1>
+<p>bisa 9.1 is here!</p>
+<section id="calling-conventions-and-prototypes">
+<h2>Calling Conventions and Prototypes<a class="headerlink" href="#calling-conventions-and-prototypes" title="Link to this heading">¶</a></h2>
+<p>The main change motivating bisa 9.1 is <a class="reference external" href="https://github.com/bisa/bisa/pull/2961">this large refactor of SimCC</a>.
+Here are the breaking changes:</p>
+<section id="simccs-can-no-longer-be-customized">
+<h3>SimCCs can no longer be customized<a class="headerlink" href="#simccs-can-no-longer-be-customized" title="Link to this heading">¶</a></h3>
+<p>If you were using the <code class="docutils literal notranslate"><span class="pre">sp_delta</span></code>, <code class="docutils literal notranslate"><span class="pre">args</span></code>, or <code class="docutils literal notranslate"><span class="pre">ret_val</span></code> parameters to SimCC, you should use the new class
+<code class="docutils literal notranslate"><span class="pre">SimCCUsercall</span></code>, which lets (requires) you to be explicit about the locations of each argument.</p>
+</section>
+<section id="passing-simtypes-is-now-mandatory">
+<h3>Passing SimTypes is now mandatory<a class="headerlink" href="#passing-simtypes-is-now-mandatory" title="Link to this heading">¶</a></h3>
+<p>Every method call on SimCC which interacts with typed data now requires a SimType to be passed in.
+Previously, the use of <code class="docutils literal notranslate"><span class="pre">is_fp</span></code> and <code class="docutils literal notranslate"><span class="pre">size</span></code> was optional, but now these parameters will no longer be accepted and a
+<code class="docutils literal notranslate"><span class="pre">SimType</span></code> will be required.</p>
+<p>This has some fairly non-intuitive consequences - in order to accommodate more esoteric calling conventions (think: passing large structs by value via an “invisible reference”) you have to specify a function’s return type before you can extract any of its arguments.</p>
+<p>Additionally, some non-cc interfaces, such as <code class="docutils literal notranslate"><span class="pre">call_state</span></code> and <code class="docutils literal notranslate"><span class="pre">callable</span></code> and <code class="docutils literal notranslate"><span class="pre">SimProcedure.call()</span></code>, now <em>require</em> a prototype to be passed to them.
+You’d be surprised how many bugs we found in our own code from enforcing this requirement!</p>
+</section>
+<section id="pointerwrapper-has-a-new-parameter">
+<h3>PointerWrapper has a new parameter<a class="headerlink" href="#pointerwrapper-has-a-new-parameter" title="Link to this heading">¶</a></h3>
+<p>Imagine you’re passing something into a function which has a parameter of type <code class="docutils literal notranslate"><span class="pre">char*</span></code>.
+Is this a pointer to a single char or a pointer to an array of chars?
+The answer changes how we typecheck the values you pass in.
+If you’re passing a PointerWrapper wrapping a large value which should be treated as an array of chars, you should construct your pointerwrapper as <code class="docutils literal notranslate"><span class="pre">PointerWrapper(foo,</span> <span class="pre">buffer=True)</span></code>.
+The buffer argument to PointerWrapper now instructs SimCC to treat the data to be serialized as an array of the child type instead of as a scalar.</p>
+</section>
+<section id="func-ty-prototype">
+<h3><code class="docutils literal notranslate"><span class="pre">func_ty</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">prototype</span></code><a class="headerlink" href="#func-ty-prototype" title="Link to this heading">¶</a></h3>
+<p>Every usage of the name func_ty has been replaced with the name prototype.
+This was done for consistency between the static analysis code and the dynamic FFI.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">bisa</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core-concepts/index.html">Core Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyses/index.html">Build-in Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced-topics/index.html">Advanced Topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-bisa/index.html">Extending bisa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">bisa examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Appendix</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="cheatsheet.html">Cheatsheet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ops.html">List of Claripy Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="options.html">List of State Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="more-examples.html">CTF Challenge Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Migrating to bisa 9.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migration-8.html">Migrating to bisa 8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migration-7.html">Migrating to bisa 7</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Appendix</a><ul>
+      <li>Previous: <a href="changelog.html" title="previous chapter">Changelog</a></li>
+      <li>Next: <a href="migration-8.html" title="next chapter">Migrating to bisa 8</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, The bisa Project contributors.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/appendix/migration-9.1.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
