@@ -1,2 +1,2 @@
 ### Документация
-Ее найти можно по следующей ссылке: http://bisadocs.com/api.html
+Ссылка на документацию: http://bisadocs.com/api.html
